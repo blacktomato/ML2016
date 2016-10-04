@@ -4,18 +4,18 @@
  # File Name : predictorPM25.py
  # Purpose : Use linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Tue 04 Oct 2016 09:34:10 AM CST
+ # Last Modified : Tue 04 Oct 2016 12:06:31 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
 from scipy.misc import derivative
 
 #Loss function L(w, b)
-def loss_function(w, b, testresult, testdata):
+def loss_function(w, w2, b, testresult, testdata):
     temp = np.zeros((1, len(testresult)));
     for i in range(len(testresult)):
-        temp[0][i] = testresult[i] - ((w * testdata[i]).sum() + b)
-    return (temp ** 2).sum()
+        temp[0][i] = testresult[i] - ((w * testdata[i] + w2 * (testdata[i] ** 2)).sum() + b)
+    return ((temp ** 2).sum() / 240) ** 0.5
 
 train_file = open('./data/train.csv', 'r', encoding='utf-8', errors='ignore')
 test_file = open('./data/test_X.csv', 'r', encoding='utf-8', errors='ignore')
@@ -76,7 +76,8 @@ for i in range(len(final_test)):
 
 #intial coefficient
 weight = np.ones((18, 9)) / 10000
-bias = 1
+weight_2 = np.ones((18, 9)) / 10000
+bias = 0.001
 #use first 14 data in train_file
 #and remain 1 for test
 training_data = []     #create 3360 datas
@@ -102,26 +103,33 @@ for day in train_days:
             training_data.append(data)
 
 total = len(training_data)
-learning_rate = 100
+learning_rate = 10000
 learning_time = 2000
 G_w = np.zeros((18, 9))
+G_w2 = np.zeros((18, 9))
 G_b = 0
 for t in range(learning_time):
     b_w = 0;
     g_w = np.zeros((18, 9))
+    g_w2 = np.zeros((18, 9))
     for i in range(total):
-        b_w = b_w + training_result[i] - ((weight * training_data[i]).sum() + bias)
-        g_w = g_w + (training_result[i] - ((weight * training_data[i]).sum() + bias)) * training_data[i]
+        change = training_result[i] - ((weight * training_data[i] + weight_2 * training_data[i] ** 2).sum() + bias)
+        b_w += change
+        g_w += (change * training_data[i])
+        g_w2 += (change * training_data[i] ** 2)
 
     #gradient
     gradient_w = -2 * g_w
-    gradient_b = 2 * b_w
+    gradient_w2 = -2 * g_w2
+    gradient_b = -2 * b_w
     G_w += gradient_w ** 2
+    G_w2 += gradient_w2 ** 2
     G_b += gradient_b ** 2
     weight = weight - learning_rate * (1 / (G_w + 0.00000001) ** 0.5 ) * gradient_w
+    weight_2 = weight_2 - learning_rate * (1 / (G_w2 + 0.00000001) ** 0.5 ) * gradient_w2
     bias = bias - learning_rate * (1 / (G_b + 0.00000001) ** 0.5 ) * gradient_b
 
-    print ("The " + str(t) + " times:", loss_function(weight, bias, testing_result, testing_data))
+    print ("The " + str(t) + " times:", loss_function(weight, weight_2, bias, testing_result, testing_data))
 
 ftest_data = []
 for day in final_test_days:
@@ -136,7 +144,8 @@ def DONE():
     Kaggle = open("For_Kaggle.csv", "w+")
     Kaggle.write("id,value\n")
     for i in range(len(ftest_data)):
-        line = "id_" + str(i) + "," + str((weight * ftest_data[i]).sum() + bias) + "\n"
+        line = "id_" + str(i) + "," + str((weight * ftest_data[i] + \
+                                           weight_2 * (ftest_data[i] ** 2) ).sum() + bias) + "\n"
         Kaggle.write(line)
     Kaggle.close()
 DONE()
