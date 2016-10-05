@@ -4,7 +4,7 @@
  # File Name : predictorPM25.py
  # Purpose : Use linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Wed 05 Oct 2016 19:08:18 CST
+ # Last Modified : Thu 06 Oct 2016 02:33:49 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -12,10 +12,9 @@ import random
 
 #Loss function L(w, b)
 def loss_function(w, b, testresult, testdata, m, s, total):
-    temp = np.zeros((1, len(testresult)));
-    for i in range(len(testresult)):
-        temp[0][i] = testresult[i] - (((w * testdata[i] ).sum() + b ) * s + m)
-    return ((temp ** 2).sum() / total ) ** 0.5
+    y_train = (np.sum(testdata * w, axis=1) + b) * s + m
+    result = testresult - y_train
+    return ((result ** 2).sum() / total ) ** 0.5
 
 train_file = open('./data/train.csv', 'r', encoding='utf-8', errors='ignore')
 test_file = open('./data/test_X.csv', 'r', encoding='utf-8', errors='ignore')
@@ -74,9 +73,9 @@ for i in range(len(final_test)):
     if i == len(final_test) - 1:
         final_test_days.append(day)
 
-training_data = []   
+training_data = np.array(())   
 training_result = np.array(())
-testing_data = []
+testing_data = np.array(())
 testing_result = np.array(())
 
 #For normalize
@@ -95,7 +94,6 @@ for d in range(len(train_days)):
 
     tempday += subday
     tempday_2 += subday ** 2
-
     if (d % 20 != 0 and d % 20 != 19):
         twdaycontainer = np.hstack((twdaycontainer, np.array(subday)))
     elif (d % 20 == 0):
@@ -104,56 +102,59 @@ for d in range(len(train_days)):
         twdaycontainer = np.hstack((twdaycontainer, np.array(subday)))
         for i in range(20 * 24 - 9):
         #0 1 2   451(452)first_testing_data  470(471)last_testing_data     479(480)
+            data = np.array(())
             if (i >= 480 - 20 - 9 ):
                 testing_result = np.hstack((testing_result, np.array(twdaycontainer[9][i + 9])))
-                training_result = np.hstack((training_result, np.array(twdaycontainer[9][i + 9])))
-                data = twdaycontainer[:, i:i+9]
-                testing_data.append(data)
-                training_data.append(data)
+                #training_result = np.hstack((training_result, np.array(twdaycontainer[9][i + 9])))
+                for j in range(1,10):
+                    data = np.hstack((data, np.transpose(twdaycontainer[:, i+j])))
+                if (d == 19 and i == 451):
+                    testing_data = np.hstack((testing_data, data))
+                    #training_data = np.vstack((training_data, data))
+                else:
+                    testing_data = np.vstack((testing_data, data))
+                    #training_data = np.vstack((training_data, data))
             else:
                 training_result = np.hstack((training_result, np.array(twdaycontainer[9][i + 9])))
-                data = twdaycontainer[:, i:i+9]
-                training_data.append(data)
+                for j in range(1,10):
+                    data = np.hstack((data, np.transpose(twdaycontainer[:, i+j])))
+                if (d == 19 and i == 0):
+                    training_data = np.hstack((training_data, data))
+                else:
+                    training_data = np.vstack((training_data, data))
 
 for i in range(18):
     mean = np.hstack((mean, np.array(tempday[i].sum() / 5760 )))
     std_d = np.hstack((std_d, np.array(tempday_2[i].sum() / 5760 )))
 std_d = (std_d - mean ** 2) ** 0.5
 
-train_total = len(training_data)
-test_total = len(testing_data)
 
-training_result = (training_result - mean[9]) / std_d[9]
-for i in range(train_total):
-    training_data[i] = np.transpose((np.transpose(training_data[i]) - mean) / std_d)
-for j in range(test_total):
-    testing_data[j] = np.transpose((np.transpose(testing_data[j]) - mean) / std_d)
-
+ttraining_result = (training_result - mean[9]) / std_d[9]
+training_data = (training_data - np.tile(mean, 9)) / np.tile(std_d, 9)
+testing_data = (testing_data - np.tile(mean, 9)) / np.tile(std_d, 9)
+print(training_data.shape)
+print(testing_data.shape)
 
 #intial coefficient
-weight = (2 * np.random.random_sample((18, 9)) - 1) / 10000
+weight = (2 * np.random.random_sample((1, 162)) - 1) / 10000
 bias = (2 * random.random() - 1) / 10000
-learning_rate = 1
-learning_time = 50000
-Lambda = 0.
-G_w = np.zeros((18, 9))
+learning_rate = 0.15
+learning_time = 2000
+Lambda = 1
+G_w = np.zeros((1, 162))
 #G_w2 = np.zeros((18, 9))
 G_b = 0
 t = 1
 while(True):
-    b_w = 0;
-    g_w = np.zeros((18, 9))
-    g_w2 = np.zeros((18, 9))
-    for i in range(train_total):
-        change = training_result[i] - ((weight * training_data[i]).sum() + bias)
-        b_w += change
-        g_w += ((change * training_data[i]) - (Lambda * weight))
-        #g_w2 += (change * training_data[i] ** 2)
+    change = ttraining_result - bias - np.sum((training_data * weight), axis=1)
+    b_w = change.sum()
+    g_w = np.sum((np.transpose(training_data) * change), axis=1)
+    #g_w2 += (change * training_data[i] ** 2)
 
     #gradient
-    gradient_w = -2 * g_w / float(train_total)
+    gradient_w = -2 * g_w
     #gradient_w2 = -2 * g_w2
-    gradient_b = -2 * b_w / float(train_total)
+    gradient_b = -2 * b_w
     G_w += gradient_w ** 2
     #G_w2 += gradient_w2 ** 2
     G_b += gradient_b ** 2
@@ -161,51 +162,34 @@ while(True):
     #weight_2 = weight_2 - learning_rate * (1 / (G_w2 + 0.00000001) ** 0.5 ) * gradient_w2
     bias = bias - learning_rate * (1 / (G_b + 0.00000001) ** 0.5 ) * gradient_b
     if (t % 10 == 0):
-        l = loss_function(weight, bias, training_result, training_data, mean[9], std_d[9], train_total)
+        l = loss_function(weight, bias, testing_result, testing_data, mean[9], std_d[9], 240)
         print ("The " + str(t) + " times: l =",l)
     t += 1
     if ( t > learning_time):
         print ("fuck")
         break
-
-ftest_data = []
+t = 0
+ftest_data = np.array(())
 for day in final_test_days:
-    data = np.zeros((18, 9))
+    data = np.array(())
     for row in range(18):
         for col in range(9):
-            data[row][col] = day[row][col]
-    ftest_data.append(data)
-for i in range(len(ftest_data)):
-    ftest_data[i] = np.transpose((np.transpose(ftest_data[i]) - mean) / std_d)
+            data = np.hstack((data, np.array(day[row][col])))
+    t += 1
+    if t == 1:
+        ftest_data = np.hstack((ftest_data, data))
+    else:
+        ftest_data = np.vstack((ftest_data, data))
 
-
+ftest_data = (ftest_data - np.tile(mean, 9)) / np.tile(std_d, 9)
 
 #Submission file
 def DONE():
     Kaggle = open("For_Kaggle.csv", "w+")
     Kaggle.write("id,value\n")
-    for i in range(len(ftest_data)):
-        line = "id_" + str(i) + "," + str(((weight * ftest_data[i]).sum() + bias) \
-                * std_d[9] + mean[9]) + "\n"
-
-ftest_data = []
-for day in final_test_days:
-    data = np.zeros((18, 9))
-    for row in range(18):
-        for col in range(9):
-            data[row][col] = day[row][col]
-    ftest_data.append(data)
-for i in range(len(ftest_data)):
-    ftest_data[i] = np.transpose((np.transpose(ftest_data[i]) - mean) / std_d)
-
-
-
-#Submission file
-def DONE():
-    Kaggle = open("For_Kaggle.csv", "w+")
-    Kaggle.write("id,value\n")
-    for i in range(len(ftest_data)):
-        line = "id_" + str(i) + "," + str(((weight * ftest_data[i]).sum() + bias) * std_d[9] + mean[9]) + "\n"
+    result = (np.sum(ftest_data * weight, axis=1) + bias) * std_d[9] + mean[9]
+    for i in range(240):
+        line = "id_" + str(i) + "," + str(result[i]) + "\n"
         Kaggle.write(line)
     Kaggle.close()
 DONE()
