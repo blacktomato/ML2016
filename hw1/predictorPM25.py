@@ -4,7 +4,7 @@
  # File Name : predictorPM25.py
  # Purpose : Use linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Thu 06 Oct 2016 02:33:49 CST
+ # Last Modified : Fri 07 Oct 2016 11:51:57 AM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -85,6 +85,7 @@ tempday = np.zeros((18, 24))
 tempday_2 = np.zeros((18, 24))
 twdaycontainer = np.zeros((18, 24))
 
+first_training = True
 for d in range(len(train_days)):
     day = train_days[d]
     subday = np.zeros((18, 24))
@@ -100,28 +101,31 @@ for d in range(len(train_days)):
         twdaycontainer = subday
     else:
         twdaycontainer = np.hstack((twdaycontainer, np.array(subday)))
-        for i in range(20 * 24 - 9):
-        #0 1 2   451(452)first_testing_data  470(471)last_testing_data     479(480)
+        #choose twenty days per month
+        all_data = random.sample(range(471), 471)
+        #For validation
+        chosen_data = all_data[0:20]
+        #For trainiing
+        rest_data = all_data[20:]
+        for i in chosen_data:
             data = np.array(())
-            if (i >= 480 - 20 - 9 ):
-                testing_result = np.hstack((testing_result, np.array(twdaycontainer[9][i + 9])))
-                #training_result = np.hstack((training_result, np.array(twdaycontainer[9][i + 9])))
-                for j in range(1,10):
-                    data = np.hstack((data, np.transpose(twdaycontainer[:, i+j])))
-                if (d == 19 and i == 451):
-                    testing_data = np.hstack((testing_data, data))
-                    #training_data = np.vstack((training_data, data))
-                else:
-                    testing_data = np.vstack((testing_data, data))
-                    #training_data = np.vstack((training_data, data))
+            testing_result = np.hstack((testing_result, np.array(twdaycontainer[9][i + 9])))
+            for j in range(9):
+                data = np.hstack((data, np.transpose(twdaycontainer[:, i+j])))
+            if (d == 19 and i == chosen_data[0]):
+                testing_data = np.hstack((testing_data, data))
             else:
-                training_result = np.hstack((training_result, np.array(twdaycontainer[9][i + 9])))
-                for j in range(1,10):
-                    data = np.hstack((data, np.transpose(twdaycontainer[:, i+j])))
-                if (d == 19 and i == 0):
-                    training_data = np.hstack((training_data, data))
-                else:
-                    training_data = np.vstack((training_data, data))
+                testing_data = np.vstack((testing_data, data))
+        for i in rest_data:
+            data = np.array(())
+            training_result = np.hstack((training_result, np.array(twdaycontainer[9][i + 9])))
+            for j in range(9):
+                data = np.hstack((data, np.transpose(twdaycontainer[:, i+j])))
+            if (d == 19 and first_training):
+                first_training = False
+                training_data = np.hstack((training_data, data))
+            else:
+                training_data = np.vstack((training_data, data))
 
 for i in range(18):
     mean = np.hstack((mean, np.array(tempday[i].sum() / 5760 )))
@@ -136,10 +140,11 @@ print(training_data.shape)
 print(testing_data.shape)
 
 #intial coefficient
-weight = (2 * np.random.random_sample((1, 162)) - 1) / 10000
-bias = (2 * random.random() - 1) / 10000
-learning_rate = 0.15
-learning_time = 2000
+weight = np.zeros((1, 162))
+bias = 0
+learning_rate = 0.5
+learning_time = 10000
+#Regularization
 Lambda = 1
 G_w = np.zeros((1, 162))
 #G_w2 = np.zeros((18, 9))
@@ -148,22 +153,19 @@ t = 1
 while(True):
     change = ttraining_result - bias - np.sum((training_data * weight), axis=1)
     b_w = change.sum()
-    g_w = np.sum((np.transpose(training_data) * change), axis=1)
-    #g_w2 += (change * training_data[i] ** 2)
+    g_w = np.sum((np.transpose(training_data) * change), axis=1) - Lambda * weight
 
     #gradient
     gradient_w = -2 * g_w
-    #gradient_w2 = -2 * g_w2
     gradient_b = -2 * b_w
     G_w += gradient_w ** 2
-    #G_w2 += gradient_w2 ** 2
     G_b += gradient_b ** 2
     weight = weight - learning_rate * (1 / (G_w + 0.00000001) ** 0.5 ) * gradient_w
-    #weight_2 = weight_2 - learning_rate * (1 / (G_w2 + 0.00000001) ** 0.5 ) * gradient_w2
     bias = bias - learning_rate * (1 / (G_b + 0.00000001) ** 0.5 ) * gradient_b
     if (t % 10 == 0):
         l = loss_function(weight, bias, testing_result, testing_data, mean[9], std_d[9], 240)
-        print ("The " + str(t) + " times: l =",l)
+        l_t = loss_function(weight, bias, training_result, training_data, mean[9], std_d[9], 5652)
+        print ("The " + str(t) + " times:  l =" ,l , "l_t =", l_t)
     t += 1
     if ( t > learning_time):
         print ("fuck")
@@ -172,8 +174,8 @@ t = 0
 ftest_data = np.array(())
 for day in final_test_days:
     data = np.array(())
-    for row in range(18):
-        for col in range(9):
+    for col in range(9):
+        for row in range(18):
             data = np.hstack((data, np.array(day[row][col])))
     t += 1
     if t == 1:
@@ -193,3 +195,4 @@ def DONE():
         Kaggle.write(line)
     Kaggle.close()
 DONE()
+print("learning_rate:", learning_rate, "times:", learning_time)
