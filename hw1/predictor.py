@@ -4,7 +4,7 @@
  # File Name : predictorPM25.py
  # Purpose : Use linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Thu 13 Oct 2016 09:33:10 PM CST
+ # Last Modified : Fri 14 Oct 2016 02:59:50 AM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -24,7 +24,6 @@ final_test = test_file.read().splitlines()
 #Remove the header
 train_data = train_data[1::]
 train_days = []
-onetenth_r = []
 #Trim the data
 day = np.zeros((18, 24)) 
 for i in range(len(train_data)):
@@ -127,16 +126,18 @@ print("Data Processing is done.\nStart training...")
 #intial coefficient
 weight = np.zeros((1, 162))
 bias = 0
-learning_rate = 0.05
-learning_time = 2000
+learning_rate = 0.2
+learning_time = 10000
 #Regularization
-Lambda = 0
+Lambda = 10
 G_w = np.zeros((1, 162))
 #G_w2 = np.zeros((18, 9))
 G_b = 0
 
 t = 1
 while(True):
+    if(t == 1000):
+        learning_rate *= 2
     change = ttraining_results - bias - np.sum((training_datas * weight), axis=1)
     b_w = change.sum()
     g_w = np.sum((np.transpose(training_datas) * change), axis=1) - Lambda * weight
@@ -149,6 +150,8 @@ while(True):
     weight = weight - learning_rate * (1 / (G_w) ** 0.5 ) * gradient_w
     bias = bias - learning_rate * (1 / (G_b) ** 0.5 ) * gradient_b
     t += 1
+    if (t % 10 == 0):
+        print("The", t, "times")
     if ( t > learning_time):
         print ("Linear Regression training is done.")
         break
@@ -175,4 +178,4 @@ def DONE():
         Kaggle.write(line)
     Kaggle.close()
 DONE()
-print("learning_rate:", learning_rate, "times:", learning_time)
+print("learning_rate:", learning_rate, "times:", learning_time, "lambda:", Lambda)

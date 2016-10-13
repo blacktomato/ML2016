@@ -1,0 +1,35 @@
+l = 6.14383672535
+learning_rate: 0.05 times: 2000 lambda: 0
+
+l = 6.14422021611
+learning_rate: 0.05 times: 2000 lambda: 1
+
+l = 6.14793524632
+learning_rate: 0.05 times: 2000 lambda: 10
+
+l = 6.00707702564
+learning_rate: 0.1 times: 2000 lambda: 10
+
+l = 6.01932016883
+learning_rate: 1 times: 2000 lambda: 10
+
+l = 6.47208802866
+learning_rate: 10 times: 2000 lambda: 10
+
+l = 6.01010960436
+learning_rate: 0.5 times: 2000 lambda: 10
+
+    l = 5.99923418845
+    learning_rate: 0.2 times: 2000 lambda: 10
+
+l = 6.00369684458
+learning_rate: 0.3 times: 2000 lambda: 10
+
+    l = 5.99402253641
+    learning_rate: 0.2 times: 2000 lambda: 0
+
+l = 5.88820368999
+learning_rate: 0.2 times: 8964 lambda: 0
+
+l = 5.88482525431
+learning_rate: 0.2 times: 10000 lambda: 10
