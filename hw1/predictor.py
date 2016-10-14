@@ -4,10 +4,11 @@
  # File Name : predictorPM25.py
  # Purpose : Use linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Fri 14 Oct 2016 02:50:05 PM CST
+ # Last Modified : Fri 14 Oct 2016 07:51:00 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
+import sys
 import random
 
 #Loss function L(w, b)
@@ -147,8 +148,6 @@ while(True):
     weight = weight - learning_rate * (1 / (G_w) ** 0.5 ) * gradient_w
     bias = bias - learning_rate * (1 / (G_b) ** 0.5 ) * gradient_b
     t += 1
-    if (t % 10 == 0):
-        print("The", t, "times")
     if ( t > learning_time):
         print ("Linear Regression training is done.")
         break
@@ -167,7 +166,7 @@ ftest_data = (ftest_data - np.tile(mean, 9)) / np.tile(std_d, 9)
 
 #Submission file
 def DONE():
-    Kaggle = open("For_Kaggle.csv", "w+")
+    Kaggle = open(sys.argv[1], "w+")
     Kaggle.write("id,value\n")
     result = (np.sum(ftest_data * weight, axis=1) + bias) * std_d[9] + mean[9]
     for i in range(240):

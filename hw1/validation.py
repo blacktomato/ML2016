@@ -4,7 +4,7 @@
  # File Name : validation.py
  # Purpose : Test learning efficiency for linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Fri 14 Oct 2016 01:37:34 PM CST
+ # Last Modified : Fri 14 Oct 2016 08:04:45 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -48,11 +48,11 @@ print("Start training...")
 weight = [np.zeros((1, 162))]*10
 bias = [0]*10
 learning_rate = 0.2
-learning_time = 10000
+learning_time = 2000
 #Regularization
 Lambda = 0 
-G_w = np.zeros((1, 162))
-G_b = 0
+G_w = [np.zeros((1, 162))]*10
+G_b = [0.0]*10
 
 t = 1
 l = np.array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
@@ -65,15 +65,14 @@ while(True):
         #gradient
         gradient_w = -2 * g_w
         gradient_b = -2 * b_w
-        G_w += gradient_w ** 2
-        G_b += gradient_b ** 2
-        weight[val] = weight[val] - learning_rate * (1 / (G_w) ** 0.5 ) * gradient_w
-        bias[val] = bias[val] - learning_rate * (1 / (G_b) ** 0.5 ) * gradient_b
+        G_w[val] += gradient_w ** 2
+        G_b[val] += gradient_b ** 2
+        weight[val] = weight[val] - learning_rate * (1 / (G_w[val]) ** 0.5 ) * gradient_w
+        bias[val] = bias[val] - learning_rate * (1 / (G_b[val]) ** 0.5 ) * gradient_b
         l[val] = loss_function(weight[val], bias[val], \
             testing_results[val], testing_datas[val], mean[9], std_d[9], 564)
-    print ("The " + str(t) + " times:  l_mean =" ,np.sum(l)/10.0, "l_variance = ", np.sum((l - np.sum(l))**2)/10.0)
-    if (t == 8964):
-        learning_rate /= 2
+    print ("The " + str(t) + " times:  l_mean =" ,np.sum(l)/10.0, "l_variance = ", \
+            np.sum((l - np.sum(l)/10)**2)/10.0)
     t += 1
     if ( t > learning_time):
         print ("Linear Regression training is done.")
