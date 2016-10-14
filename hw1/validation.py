@@ -4,7 +4,7 @@
  # File Name : validation.py
  # Purpose : Test learning efficiency for linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Fri 14 Oct 2016 03:16:33 AM CST
+ # Last Modified : Fri 14 Oct 2016 01:37:34 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -23,13 +23,11 @@ testing_datas = [np.array(())]*10
 testing_results = [np.array(())]*10
 ttesting_results = [np.array(())]*10
 
-#For normalize
-mean = np.array(())
-std_d = np.array(())
 
             
 print("Reading data file...")
 
+#For normalize
 mean = np.load("./data_validation/mean.npy")
 std_d = np.load("./data_validation/std_sigma.npy")
 
@@ -52,15 +50,13 @@ bias = [0]*10
 learning_rate = 0.2
 learning_time = 10000
 #Regularization
-Lambda = 10
+Lambda = 0 
 G_w = np.zeros((1, 162))
-#G_w2 = np.zeros((18, 9))
 G_b = 0
 
-last_l = 0
 t = 1
+l = np.array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
 while(True):
-    l = 0;
     for val in range(10):
         change = ttraining_results[val] - bias[val] - np.sum((training_datas[val] * weight[val]), axis=1)
         b_w = change.sum()
@@ -73,13 +69,11 @@ while(True):
         G_b += gradient_b ** 2
         weight[val] = weight[val] - learning_rate * (1 / (G_w) ** 0.5 ) * gradient_w
         bias[val] = bias[val] - learning_rate * (1 / (G_b) ** 0.5 ) * gradient_b
-        l += loss_function(weight[val], bias[val], \
+        l[val] = loss_function(weight[val], bias[val], \
             testing_results[val], testing_datas[val], mean[9], std_d[9], 564)
-    print ("The " + str(t) + " times:  l =" ,l / 10)
-    if (last_l != 0 and abs(last_l - l) < 0.0001 ):
-        learning_rate *= 2
-    last_l = l
-
+    print ("The " + str(t) + " times:  l_mean =" ,np.sum(l)/10.0, "l_variance = ", np.sum((l - np.sum(l))**2)/10.0)
+    if (t == 8964):
+        learning_rate /= 2
     t += 1
     if ( t > learning_time):
         print ("Linear Regression training is done.")

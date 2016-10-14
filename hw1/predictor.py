@@ -4,7 +4,7 @@
  # File Name : predictorPM25.py
  # Purpose : Use linear regression to predict the PM2.5
  # Creation Date : Sun 02 Oct 2016 14:17:35 CST
- # Last Modified : Fri 14 Oct 2016 02:59:50 AM CST
+ # Last Modified : Fri 14 Oct 2016 02:50:05 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -127,17 +127,14 @@ print("Data Processing is done.\nStart training...")
 weight = np.zeros((1, 162))
 bias = 0
 learning_rate = 0.2
-learning_time = 10000
+learning_time = 8964
 #Regularization
-Lambda = 10
+Lambda = 0
 G_w = np.zeros((1, 162))
-#G_w2 = np.zeros((18, 9))
 G_b = 0
 
 t = 1
 while(True):
-    if(t == 1000):
-        learning_rate *= 2
     change = ttraining_results - bias - np.sum((training_datas * weight), axis=1)
     b_w = change.sum()
     g_w = np.sum((np.transpose(training_datas) * change), axis=1) - Lambda * weight
