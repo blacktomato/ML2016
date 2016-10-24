@@ -4,7 +4,7 @@
  # File Name : logistic_regression.py
  # Purpose : Implement logistic regression to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Mon 24 Oct 2016 05:38:37 PM CST
+ # Last Modified : Mon 24 Oct 2016 05:58:47 PM CST
  # Created By : SL Chung
 ##############################################################
 import math
@@ -41,21 +41,18 @@ data = (data - mean) / std_s
 
 print("Data Processing is done.\nStart training...")
 
-def likelihood_function(w, b, testresult, testdata):
-    offset = 0.1
+def E_function(w, b, testresult, testdata):
+    offset = 0.0001
     z = (np.sum(testdata * w, axis=1) + b)
     f_wb = 1 / (1+ math.e ** (-z))
-    p = np.prod(testresult * (f_wb+offset) + (1-testresult) * (1-f_wb+offset))
     cross_entropy = np.sum(testresult * np.log(f_wb+offset, np.array([math.e]*4001)) + \
                     (1-testresult) * np.log((1-f_wb+offset), np.array([math.e]*4001)))
-    print("Cross Entropy:", -cross_entropy)
-    return p
+    return -cross_entropy
 
 #intial coefficient
 weight = np.zeros((1, 57))
 bias = 0
-learning_rate = 0.1
-learning_time = 100
+learning_time = 100000
 #Regularization
 Lambda = 0
 #Adadelta
@@ -86,7 +83,7 @@ while(True):
     weight += t_w
     bias += t_b
     if (t % 100 == 0):
-        print("The", t, "times__likelihood: ", likelihood_function(weight, bias, answer, data) )
+        print("The", t, "times__Cross Entropy:", E_function(weight, bias, answer, data) )
     if ( t > learning_time):
         print ("Logistic Regression training is done.")
         break
@@ -97,3 +94,6 @@ model = open(sys.argv[2], "wb+")
 bind = (weight, bias, mean, std_s)
 pickle.dump(bind, model)
 model.close()
+
+print ("Training time:", t)
+print("Cross Entropy:", E_function(weight, bias, answer, data) )
