@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
 ##############################################################
- # File Name : logistic_regression.py
- # Purpose : Implement logistic regression to classify spam email or not
+ # File Name : nn.py
+ # Purpose : Implement nerual network to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Mon 24 Oct 2016 05:58:47 PM CST
+ # Last Modified : Mon 24 Oct 2016 08:30:59 PM CST
  # Created By : SL Chung
 ##############################################################
 import math
@@ -50,18 +50,17 @@ def E_function(w, b, testresult, testdata):
     return -cross_entropy
 
 #intial coefficient
-weight = np.zeros((1, 57))
-bias = 0
-learning_time = 100000
+weight = np.zeros((2, 57, 57))
+bias = np.zeros((2, 1, 57))
 #Regularization
 Lambda = 0
 #Adadelta
-G_w = np.zeros((1, 57))
-G_b = 0
-t_w = np.zeros((1, 57))
-t_b = 0
-T_w = np.zeros((1, 57))
-T_b = 0
+G_w = np.zeros((2, 57, 57))
+G_b = np.zeros((2, 1, 57))
+t_w = np.zeros((2, 57, 57))
+t_b = np.zeros((2, 1, 57))
+T_w = np.zeros((2, 57, 57))
+T_b = np.zeros((2, 1, 57))
 gamma = 0.9
 epsilon = 10 ** -8
 
