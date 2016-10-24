@@ -4,13 +4,14 @@
  # File Name : logistic_regression.py
  # Purpose : Implement logistic regression to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Mon 24 Oct 2016 02:28:33 AM CST
+ # Last Modified : Mon 24 Oct 2016 05:38:37 PM CST
  # Created By : SL Chung
 ##############################################################
 import math
 import numpy as np
 import sys
 import random
+import pickle
 
 train_file = open(sys.argv[1], "r", encoding='utf-8', errors='ignore')
 train_data = train_file.read().splitlines()
@@ -30,45 +31,69 @@ for i in range(len(train_data)):
     else:
         data = np.vstack(( data, data_temp ))
     answer = np.hstack(( answer, np.array( float(data_element[57]) ) ))
-    
+
+#Normalization
+mean = np.sum(data, axis=0)/len(train_data)
+std_s = (np.sum((data - mean) ** 2, axis=0)/len(train_data) ) ** 0.5
+
+data = (data - mean) / std_s
+
+
 print("Data Processing is done.\nStart training...")
 
 def likelihood_function(w, b, testresult, testdata):
+    offset = 0.1
     z = (np.sum(testdata * w, axis=1) + b)
     f_wb = 1 / (1+ math.e ** (-z))
-    p = np.prod(testresult * f_wb + (1-testresult) * (1-f_wb))
-    cross_entropy = np.sum(testresult * np.log(f_wb, np.array([math.e]*4001)) + \
-                    (1-testresult) * np.log((1-f_wb), np.array([math.e]*4001)))
+    p = np.prod(testresult * (f_wb+offset) + (1-testresult) * (1-f_wb+offset))
+    cross_entropy = np.sum(testresult * np.log(f_wb+offset, np.array([math.e]*4001)) + \
+                    (1-testresult) * np.log((1-f_wb+offset), np.array([math.e]*4001)))
     print("Cross Entropy:", -cross_entropy)
     return p
 
 #intial coefficient
 weight = np.zeros((1, 57))
 bias = 0
-learning_rate = 0.0001
-learning_time = 10000
+learning_rate = 0.1
+learning_time = 100
 #Regularization
 Lambda = 0
+#Adadelta
 G_w = np.zeros((1, 57))
 G_b = 0
+t_w = np.zeros((1, 57))
+t_b = 0
+T_w = np.zeros((1, 57))
+T_b = 0
+gamma = 0.9
+epsilon = 10 ** -8
 
 t = 1
 while(True):
     z = np.sum(data * weight, axis=1) + bias
     f_wb = 1 / (1+ math.e ** (-z))
     change = answer - f_wb 
-    b_w = change.sum()
-    g_w = np.sum(np.transpose(data) * change, axis=1) - Lambda * weight
+    gradient_b = -1 * (change.sum())
+    gradient_w = -1 * (np.sum(np.transpose(data) * change, axis=1) - Lambda * weight)
 
-    #gradient
-    gradient_w = -g_w
-    gradient_b = -b_w
-    G_w += gradient_w ** 2
-    G_b += gradient_b ** 2
-    weight = weight - learning_rate * (1 / (G_w) ** 0.5 ) * gradient_w
-    bias = bias - learning_rate * (1 / (G_b) ** 0.5 ) * gradient_b
-    print("The", t, "times__likelihood: ", likelihood_function(weight, bias, answer, data) )
+    #gradient adadelta
+    G_w = gamma * G_w + (1 - gamma) * (gradient_w ** 2)
+    G_b = gamma * G_b + (1 - gamma) * (gradient_b ** 2)
+    t_w = -(((T_w + epsilon) ** 0.5) / ((G_w + epsilon) ** 0.5))  * gradient_w
+    t_b = -(((T_b + epsilon) ** 0.5) / ((G_b + epsilon) ** 0.5))  * gradient_b
+    T_w = gamma * T_w + (1 - gamma) * (t_w ** 2)
+    T_b = gamma * T_b + (1 - gamma) * (t_b ** 2)
+    weight += t_w
+    bias += t_b
+    if (t % 100 == 0):
+        print("The", t, "times__likelihood: ", likelihood_function(weight, bias, answer, data) )
     if ( t > learning_time):
         print ("Logistic Regression training is done.")
         break
     t += 1
+
+#output the model
+model = open(sys.argv[2], "wb+")
+bind = (weight, bias, mean, std_s)
+pickle.dump(bind, model)
+model.close()
