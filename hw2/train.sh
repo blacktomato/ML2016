@@ -1,2 +1,2 @@
 #!/bin/bash
-python ./logistic_regression.py $1 $2
+python ./nn.py $1 $2

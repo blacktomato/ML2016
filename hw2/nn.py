@@ -4,7 +4,7 @@
  # File Name : nn.py
  # Purpose : Implement nerual network to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Mon 24 Oct 2016 08:30:59 PM CST
+ # Last Modified : Wed 26 Oct 2016 10:57:13 AM CST
  # Created By : SL Chung
 ##############################################################
 import math
@@ -41,48 +41,75 @@ data = (data - mean) / std_s
 
 print("Data Processing is done.\nStart training...")
 
-def E_function(w, b, testresult, testdata):
-    offset = 0.0001
-    z = (np.sum(testdata * w, axis=1) + b)
-    f_wb = 1 / (1+ math.e ** (-z))
-    cross_entropy = np.sum(testresult * np.log(f_wb+offset, np.array([math.e]*4001)) + \
-                    (1-testresult) * np.log((1-f_wb+offset), np.array([math.e]*4001)))
+def E_function(w1, b1, w2, b2, testresult, testdata):
+    offset = 0.001
+    z_1 = np.dot(testdata, w1) + b1
+    a_1 = 1 / (1+ math.e ** (-z_1))
+    z_2 = np.sum( a_1 * w2, axis=1) + b2
+    y = 1 / (1+ math.e ** (-z_2))
+    cross_entropy = np.sum(testresult * np.log(y+offset, np.array([math.e]*4001)) + \
+                    (1-testresult) * np.log((1-y+offset), np.array([math.e]*4001)))
     return -cross_entropy
 
 #intial coefficient
-weight = np.zeros((2, 57, 57))
-bias = np.zeros((2, 1, 57))
+weight_1 = np.zeros((57, 57))
+bias_1 = np.zeros((1, 57))
+weight_2 = np.zeros((1, 57))
+bias_2 = 0
+learning_time = 5000
 #Regularization
 Lambda = 0
 #Adadelta
-G_w = np.zeros((2, 57, 57))
-G_b = np.zeros((2, 1, 57))
-t_w = np.zeros((2, 57, 57))
-t_b = np.zeros((2, 1, 57))
-T_w = np.zeros((2, 57, 57))
-T_b = np.zeros((2, 1, 57))
+G_w1 = np.zeros((57, 57))
+G_b1 = np.zeros((1, 57))
+t_w1 = np.zeros((57, 57))
+t_b1 = np.zeros((1, 57))
+T_w1 = np.zeros((57, 57))
+T_b1 = np.zeros((1, 57))
+G_w2 = np.zeros((1, 57))
+G_b2 = 0
+t_w2 = np.zeros((1, 57))
+t_b2 = 0
+T_w2 = np.zeros((1, 57))
+T_b2 = 0 
 gamma = 0.9
 epsilon = 10 ** -8
 
 t = 1
 while(True):
-    z = np.sum(data * weight, axis=1) + bias
-    f_wb = 1 / (1+ math.e ** (-z))
-    change = answer - f_wb 
-    gradient_b = -1 * (change.sum())
-    gradient_w = -1 * (np.sum(np.transpose(data) * change, axis=1) - Lambda * weight)
+    z_1 = np.dot(data, weight_1) + bias_1
+    a_1 = 1 / (1+ math.e ** (-z_1))
+    z_2 = np.sum( a_1 * weight_2, axis=1) + bias_2
+    y = 1 / (1+ math.e ** (-z_2))
+    change = answer - y
+    gradient_b2 = -1 * (change.sum())
+    gradient_w2 = -1 * (np.sum(np.transpose(a_1) * change, axis=1))
 
-    #gradient adadelta
-    G_w = gamma * G_w + (1 - gamma) * (gradient_w ** 2)
-    G_b = gamma * G_b + (1 - gamma) * (gradient_b ** 2)
-    t_w = -(((T_w + epsilon) ** 0.5) / ((G_w + epsilon) ** 0.5))  * gradient_w
-    t_b = -(((T_b + epsilon) ** 0.5) / ((G_b + epsilon) ** 0.5))  * gradient_b
-    T_w = gamma * T_w + (1 - gamma) * (t_w ** 2)
-    T_b = gamma * T_b + (1 - gamma) * (t_b ** 2)
-    weight += t_w
-    bias += t_b
-    if (t % 100 == 0):
-        print("The", t, "times__Cross Entropy:", E_function(weight, bias, answer, data) )
+    delta_1 = (a_1*(1-a_1)) * np.dot(np.transpose([change]), weight_2)
+    gradient_b1 = -1 * np.sum(delta_1, axis=0)
+    gradient_w1 = -1 * np.dot(np.transpose(data), delta_1)
+
+    #gradient_1 adadelta
+    G_w1 = gamma * G_w1 + (1 - gamma) * (gradient_w1 ** 2)
+    G_b1 = gamma * G_b1 + (1 - gamma) * (gradient_b1 ** 2)
+    t_w1 = -(((T_w1 + epsilon) ** 0.5) / ((G_w1 + epsilon) ** 0.5))  * gradient_w1
+    t_b1 = -(((T_b1 + epsilon) ** 0.5) / ((G_b1 + epsilon) ** 0.5))  * gradient_b1
+    T_w1 = gamma * T_w1 + (1 - gamma) * (t_w1 ** 2)
+    T_b1 = gamma * T_b1 + (1 - gamma) * (t_b1 ** 2)
+    weight_1 += t_w1
+    bias_1 += t_b1
+    
+    #gradient_2 adadelta
+    G_w2 = gamma * G_w2 + (1 - gamma) * (gradient_w2 ** 2)
+    G_b2 = gamma * G_b2 + (1 - gamma) * (gradient_b2 ** 2)
+    t_w2 = -(((T_w2 + epsilon) ** 0.5) / ((G_w2 + epsilon) ** 0.5))  * gradient_w2
+    t_b2 = -(((T_b2 + epsilon) ** 0.5) / ((G_b2 + epsilon) ** 0.5))  * gradient_b2
+    T_w2 = gamma * T_w2 + (1 - gamma) * (t_w2 ** 2)
+    T_b2 = gamma * T_b2 + (1 - gamma) * (t_b2 ** 2)
+    weight_2 += t_w2
+    bias_2 += t_b2
+    if (t % 1 == 0):
+        print("The", t, "times__Cross Entropy:", E_function(weight_1, bias_1, weight_2, bias_2, answer, data) )
     if ( t > learning_time):
         print ("Logistic Regression training is done.")
         break
@@ -90,9 +117,9 @@ while(True):
 
 #output the model
 model = open(sys.argv[2], "wb+")
-bind = (weight, bias, mean, std_s)
+bind = (weight_1, bias_1, weight_2, bias_2, mean, std_s)
 pickle.dump(bind, model)
 model.close()
 
 print ("Training time:", t)
-print("Cross Entropy:", E_function(weight, bias, answer, data) )
+print("Cross Entropy:", E_function(weight_1, bias_1, weight_2, bias_2, answer, data) )
