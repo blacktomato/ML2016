@@ -4,7 +4,7 @@
  # File Name : nn.py
  # Purpose : Implement nerual network to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Wed 26 Oct 2016 10:57:13 AM CST
+ # Last Modified : Thu 27 Oct 2016 08:00:11 PM CST
  # Created By : SL Chung
 ##############################################################
 import math
@@ -52,25 +52,26 @@ def E_function(w1, b1, w2, b2, testresult, testdata):
     return -cross_entropy
 
 #intial coefficient
-weight_1 = np.zeros((57, 57))
-bias_1 = np.zeros((1, 57))
-weight_2 = np.zeros((1, 57))
+node = 50
+weight_1 = np.zeros((57, node))
+bias_1 = np.zeros((1, node))
+weight_2 = np.zeros((1, node))
 bias_2 = 0
 learning_time = 5000
 #Regularization
 Lambda = 0
 #Adadelta
-G_w1 = np.zeros((57, 57))
-G_b1 = np.zeros((1, 57))
-t_w1 = np.zeros((57, 57))
-t_b1 = np.zeros((1, 57))
-T_w1 = np.zeros((57, 57))
-T_b1 = np.zeros((1, 57))
-G_w2 = np.zeros((1, 57))
+G_w1 = np.zeros((57, node))
+G_b1 = np.zeros((1, node))
+t_w1 = np.zeros((57, node))
+t_b1 = np.zeros((1, node))
+T_w1 = np.zeros((57, node))
+T_b1 = np.zeros((1, node))
+G_w2 = np.zeros((1, node))
 G_b2 = 0
-t_w2 = np.zeros((1, 57))
+t_w2 = np.zeros((1, node))
 t_b2 = 0
-T_w2 = np.zeros((1, 57))
+T_w2 = np.zeros((1, node))
 T_b2 = 0 
 gamma = 0.9
 epsilon = 10 ** -8
@@ -111,7 +112,7 @@ while(True):
     if (t % 1 == 0):
         print("The", t, "times__Cross Entropy:", E_function(weight_1, bias_1, weight_2, bias_2, answer, data) )
     if ( t > learning_time):
-        print ("Logistic Regression training is done.")
+        print ("Neural Network training is done.")
         break
     t += 1
 
