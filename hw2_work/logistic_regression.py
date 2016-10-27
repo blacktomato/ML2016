@@ -4,7 +4,7 @@
  # File Name : logistic_regression.py
  # Purpose : Implement logistic regression to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Tue 25 Oct 2016 02:13:39 AM CST
+ # Last Modified : Thu 27 Oct 2016 06:12:00 PM CST
  # Created By : SL Chung
 ##############################################################
 import math
@@ -52,7 +52,7 @@ def E_function(w, b, testresult, testdata):
 #intial coefficient
 weight = np.zeros((1, 57))
 bias = 0
-learning_time = 100000
+learning_time = 20000
 #Regularization
 Lambda = 0
 #Adadelta
