@@ -4,7 +4,7 @@
  # File Name : logistic_regression.py
  # Purpose : Implement logistic regression to classify spam email or not
  # Creation Date : Sun 23 Oct 2016 02:53:55 PM CST
- # Last Modified : Thu 27 Oct 2016 06:04:06 PM CST
+ # Last Modified : Thu 27 Oct 2016 07:08:35 PM CST
  # Created By : SL Chung
 ##############################################################
 import math
