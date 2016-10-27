@@ -4,54 +4,19 @@
  # File Name : validation.py
  # Purpose :
  # Creation Date : Mon 24 Oct 2016 08:35:29 PM CST
- # Last Modified : Mon 24 Oct 2016 11:26:33 PM CST
+ # Last Modified : Thu 27 Oct 2016 11:07:05 AM CST
  # Created By : SL Chung
 ##############################################################
 import math
 import numpy as np
 import sys
 import random
-
-train_file = open(sys.argv[1], "r", encoding='utf-8', errors='ignore')
-train_data = train_file.read().splitlines()
-
-data = np.array(())
-answer = np.array(())
-for i in range(len(train_data)):
-    #remove id for each data
-    data_element = train_data[i].split(',')[1::]
-    data_temp = np.array(())
-    #data processing
-    for j in range(57):
-        data_temp = np.hstack(( data_temp, np.array( float(data_element[j]) ) ))
-    #answer
-    if (i == 0):
-        data = np.hstack(( data, data_temp ))
-    else:
-        data = np.vstack(( data, data_temp ))
-    answer = np.hstack(( answer, np.array( float(data_element[57]) ) ))
-
-#Normalization
-mean = np.sum(data, axis=0)/len(train_data)
-std_s = (np.sum((data - mean) ** 2, axis=0)/len(train_data) ) ** 0.5
-
-data = (data - mean) / std_s
+import pickle
 
 
-trainings = []
-validations = []
-t_ans = []
-v_ans = []
-
-for i in range(10):
-    validations.append(data[0:400])
-    v_ans.append(answer[0:400])
-    trainings.append(data[400::])
-    t_ans.append(answer[400::])
-    data = np.roll(data, 400, axis=0)
-    answer = np.roll(answer, 400)
-
-print("Data Processing is done.\nStart training...")
+valid_data = open(sys.argv[1], "rb")
+(validations, v_ans, trainings, t_ans) = pickle.load(valid_data)
+valid_data.close()
 
 def E_function(w, b, testresult, testdata):
     offset = 0.0001
@@ -64,7 +29,7 @@ def E_function(w, b, testresult, testdata):
 #intial coefficient
 weight = [np.zeros((1, 57))]*10
 bias = [0]*10
-learning_time = 100000
+learning_time = int(sys.argv[2])
 #Regularization
 Lambda = 0
 #Adadelta
@@ -77,8 +42,9 @@ T_b = [0]*10
 gamma = 0.99
 epsilon = 10 ** -8 
 
-t = 1
+t = 0
 while(True):
+    t += 1
     CE = np.array([0.0] * 10)
     for i in range(10):
         z = np.sum(trainings[i] * weight[i], axis=1) + bias[i]
@@ -97,15 +63,15 @@ while(True):
         weight[i] += t_w[i]
         bias[i] += t_b[i]
 
-        if (t % 100 == 0):
+        if (t == learning_time):
             CE[i] = E_function(weight[i], bias[i], v_ans[i], validations[i])
-    mean_CE = np.sum(CE) / float(10)
-    vari_CE = np.sum((CE - mean_CE)**2) / float(10)
-    if (t % 100 == 0):
+    if (t == learning_time):
+        mean_CE = np.sum(CE) / float(10)
+        vari_CE = np.sum((CE - mean_CE)**2) / float(10)
         print("The", t, "times__mean_CE:", mean_CE, "vari_CE:", vari_CE )
+#   if (t % 100 == 0):
+#        print("The", t, "times__mean_CE:", mean_CE, "vari_CE:", vari_CE )
         #print("The", t, "times__mean_CE:", CE)
-    if ( t > learning_time):
         print ("Logistic Regression training is done.")
         break
-    t += 1
 
