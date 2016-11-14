@@ -4,14 +4,12 @@
  # File Name : cnn.py
  # Purpose : To classify the image
  # Creation Date : Fri 04 Nov 2016 10:41:51 AM CST
- # Last Modified : Sun 13 Nov 2016 00:35:44 CST
+ # Last Modified : Mon 14 Nov 2016 02:35:29 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
 import pickle
 import sys
-from keras.models import Sequential
-from keras.layers import Dense, Activation
 
 #load the label and unlabel data
 label_file = open(sys.argv[1] + 'all_label.p', "rb")
