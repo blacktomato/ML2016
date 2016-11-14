@@ -4,7 +4,7 @@
  # File Name : cnn_fast.py
  # Purpose :
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Mon 14 Nov 2016 08:38:56 CST
+ # Last Modified : Mon 14 Nov 2016 02:25:28 PM CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -19,7 +19,7 @@ from keras.layers import Convolution2D, MaxPooling2D, Flatten
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 
-def train_cifar10(X, Y):
+def train_cifar10(X, Y, epoch, batch):
     model = Sequential()
     #Convolution
     model.add(Convolution2D(30, 5, 5, border_mode='same', input_shape=(3, 32, 32)))
@@ -43,7 +43,7 @@ def train_cifar10(X, Y):
 
     #Training
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.fit(X, Y,validation_split=0.1, batch_size=300, nb_epoch=100)
+    model.fit(X, Y,validation_split=0.1, batch_size=batch, nb_epoch=epoch)
     #model.fit(xtrain[train], ytrain[train], batch_size=300, nb_epoch=100)
     #scores = model.evaluate(xtrain[test], ytrain[test], verbose=0)
     #print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
@@ -74,21 +74,29 @@ xtrain, ytrain = shuffle(xtrain, ytrain, random_state = 0)
 #cvscores=[]
 
 #Start training
-model = train_cifar10(xtrain, ytrain)
+epoch = 100
+batch = len(xtrain) / 10
+model = train_cifar10(xtrain, ytrain, epoch, batch)
 #for train, test in kfold.split(xtrain, ytrain):
 
 unlabel_result = model.predict(unlabel, batch_size=32, verbose=0)
-for i in range(len(unlabel_result)):
-    if unlabel_result[i].max() > unlabel_result[i].sum() / 2:
-        print('Adding unlabel data [', str(i), ']...')
-        xtrain = np.vstack(( xtrain, unlabel[i].reshape((1, 3, 32, 32)) ))
-        ytrain = np.vstack(( ytrain, ((unlabel_result[i] == unlabel_result[i].max)*1).reshape(1, 10) ))
 
-print(xtrain.shape)
+temp_max = unlabel_result.max(axis=1)
+class_max = unlabel_result.argmax(axis=1)
+index_max = (temp_max > (unlabel_result.sum(axis=1) / 2) ).nonzero()
+training_unlabel = unlabel[index_max]
+testing_unlabel = np.identity(10, dtype=int)[class_max[index_max]]
 
-model = train_cifar10(xtrain, ytrain)
+xtrain = np.vstack(( xtrain, training_unlabel ))
+ytrain = np.vstack(( ytrain, testing_unlabel ))
 
-test_result = model.predict(xtest, batch_size=32, verbose=0)
+#Training again
+epoch = 100
+batch = len(xtrain) / 10
+model = train_cifar10(xtrain, ytrain, epoch, batch)
+
+
+test_result = model.predict(xtest, batch_size=100, verbose=0)
 #output file
 output = open(sys.argv[1], "w+")
 output.write("ID,class\n")
