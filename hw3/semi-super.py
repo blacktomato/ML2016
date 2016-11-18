@@ -4,7 +4,7 @@
  # File Name : semi-super_fast.py
  # Purpose : Use the data process by numpy and do the semi-supervise learing 
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Fri 18 Nov 2016 16:55:56 CST
+ # Last Modified : Sat 19 Nov 2016 00:14:19 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -123,4 +123,4 @@ epoch = 40
 batch = 500
 model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
 
-model.save(sys.argv[1]+'.h5')
+model.save(sys.argv[1])
