@@ -1,9 +1,8 @@
 How to start to training:
 
-    ./train.sh <PathToData> <model-super> <model-encoder>
+    ./train.sh <PathToData> trained_model trained_encoder
 
 How to start to testing:
     
-    ./test.sh <PathToData> <model-super>.h5 <model-encoder>.h5 <Output>
+    ./test.sh <PathToData> trained_model trained_encoder <Output>
 
-When using test.sh, model-name and model-encoder should be with ' .h5 '.
