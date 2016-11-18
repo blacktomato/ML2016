@@ -6,4 +6,4 @@ How to start to testing:
     
     ./test.sh <PathToData> model-super.h5 <Output>
 
-When using test.sh, model-name should be with \'.h5\'.
+When using test.sh, model-name should be with ' .h5 '.
