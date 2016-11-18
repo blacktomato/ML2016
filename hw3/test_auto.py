@@ -3,7 +3,7 @@
 ##############################################################
  # Purpose :
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Fri 18 Nov 2016 16:59:39 CST
+ # Last Modified : Fri 18 Nov 2016 17:57:01 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np

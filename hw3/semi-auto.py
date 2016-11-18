@@ -4,7 +4,7 @@
  # File Name : semi_auto.py
  # Purpose : Use the data process by numpy and do the autoencoder-SVM learing 
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Fri 18 Nov 2016 16:44:22 CST
+ # Last Modified : Fri 18 Nov 2016 17:56:12 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
