@@ -4,7 +4,7 @@
  # File Name : cnn.py
  # Purpose : To classify the image
  # Creation Date : Fri 04 Nov 2016 10:41:51 AM CST
- # Last Modified : Mon 14 Nov 2016 02:35:29 PM CST
+ # Last Modified : Fri 18 Nov 2016 15:52:23 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np

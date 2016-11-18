@@ -4,7 +4,7 @@
  # File Name : semi-super_fast.py
  # Purpose : Use the data process by numpy and do the semi-supervise learing 
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Thu 17 Nov 2016 02:39:06 CST
+ # Last Modified : Fri 18 Nov 2016 16:00:09 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -12,7 +12,6 @@ import pickle
 import sys
 
 from sklearn.utils import shuffle
-from sklearn.model_selection import KFold
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
@@ -40,7 +39,7 @@ model.add(BatchNormalization(epsilon=1e-05, mode=0, axis=-1, momentum=0.99, weig
                    gamma_init='one', gamma_regularizer=None, beta_regularizer=None))
 #Fully connected
 model.add(Dense(100))
-model.add(Activation('sigmoid'))
+model.add(Activation('relu'))
 model.add(Dropout(0.1))
 model.add(Dense(10))
 model.add(Activation('softmax'))
@@ -51,6 +50,7 @@ es=EarlyStopping(monitor='loss', min_delta=0.00001, patience=5, verbose=0, mode=
 
 def train_cifar10(X, Y, epoch, batch, datagen):
     #Training
+    datagen.fit(X)
     model.fit_generator(datagen.flow(X, Y, batch_size=batch), callbacks=[es]
                         ,samples_per_epoch=len(X), nb_epoch=epoch)
     #model.fit(xtrain[train], ytrain[train], batch_size=300, nb_epoch=100)
@@ -71,11 +71,6 @@ ytrain = np.transpose(temp, (2,0,1)).reshape(5000,10)
 #shuffle for validation
 xtrain, ytrain = shuffle(xtrain, ytrain, random_state = 0)
 #fix random seed for reproducibility
-#seed = 7
-#np.random.seed(seed)
-#define 10-fold cross validation test harness
-#kfold = KFold(n_splits=10)
-#cvscores=[]
 
 datagen = ImageDataGenerator(
     rotation_range=5,  # randomly rotate images in the range (degrees, 0 to 180)
@@ -83,45 +78,52 @@ datagen = ImageDataGenerator(
     height_shift_range=0.02)  # randomly shift images vertically (fraction of total height)
 
 #Start training
+each = 500
 while(len(unlabel) > 8000):
-    epoch = 40
+    epoch = 80
     batch = 300
     model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
-    #for train, test in kfold.split(xtrain, ytrain):
     if (len(unlabel)==0):
         break
     else:
         unlabel_result = model.predict(unlabel, batch_size=100, verbose=0)
 
         temp_max = unlabel_result.max(axis=1)
-        class_max = unlabel_result.argmax(axis=1)
-        confident_data = (temp_max > (unlabel_result.sum(axis=1) * 0.8) )*1
-        adding_index_max = confident_data.nonzero()
-        training_unlabel = unlabel[adding_index_max]
-        unlabel = np.delete(unlabel, adding_index_max, axis=0)
+        #get the confident data(maybe the right answer)
+        confident_data = ((temp_max > (0.8) )*1).nonzero()[0]
+        #only get the answer for confident data
+        class_max = unlabel_result.argmax(axis=1)[confident_data]
+        
+        #Adding same number of data for each class
+        counting = np.bincount(class_max)
+        increase = np.min(counting) - each
+        if (increase <= 0):
+            break
+        each = np.min(counting)
+
+        #index for confident_data
+        adding_index_max = np.array(())
+        for i in range(10):
+            adding_index_max = np.hstack(( np.random.choice((class_max == i).nonzero()[0], increase, replace=True),
+                               adding_index_max))
+        adding_index_max = adding_index_max.astype(int)
+        
+        #remove some of the confident_data the unlabel 
+        training_unlabel = unlabel[confident_data[adding_index_max]]
+        unlabel = np.delete(unlabel, confident_data[adding_index_max], axis=0)
         testing_unlabel = np.identity(10, dtype=int)[class_max[adding_index_max]]
 
         xtrain = np.vstack(( xtrain, training_unlabel ))
         ytrain = np.vstack(( ytrain, testing_unlabel  ))
         print(np.sum(ytrain, axis=0))
+
     print(len(xtrain))
 
-epoch = 30
+epoch = 40
 batch = 500
 model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
 
-test_result = model.predict(xtest, batch_size=100, verbose=0)
-total = np.array([0]*10)
-#output file
-output = open(sys.argv[1], "w+")
-output.write("ID,class\n")
 
-for i in range(len(test_result)):
-    total[int(np.argmax(test_result[i]))] += 1
-    line = str(i) + "," + str(int(np.argmax(test_result[i]))) + "\n"
-    output.write(line)
-output.close()
-
-print(total)
-print("Output file:", sys.argv[1]) 
-
+model_file = open(sys.argv[2], "wb+")
+pickle.dump(model, model_file)
+model_file.close()
