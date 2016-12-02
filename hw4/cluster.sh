@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 ./cluter.py $1 $2
+python3 ./cluster.py $1 $2
