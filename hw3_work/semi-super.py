@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # coding=utf-8
 ##############################################################
- # File Name : semi-super_fast.py
+ # File Name : semi-super.py
  # Purpose : Use the data process by numpy and do the semi-supervise learing 
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Fri 18 Nov 2016 16:00:09 CST
+ # Last Modified : Fri 18 Nov 2016 17:26:51 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np

@@ -3,3 +3,4 @@
 
 *   **hw1**: Linear Regression實作 - PM2.5\_Predictor
 *   **hw2**: Logistic Regression實作 - Spam\_Classification
+*   **hw3**: cNN和autoencoder實作(Keras) - Semi-supervised\_Learning\_in\_Picture\_Classification

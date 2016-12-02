@@ -4,7 +4,7 @@
  # File Name : cnn_fast.py
  # Purpose :
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Wed 16 Nov 2016 01:10:17 CST
+ # Last Modified : Fri 18 Nov 2016 20:40:59 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -47,10 +47,10 @@ model.summary()
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 es=EarlyStopping(monitor='loss', min_delta=0.00001, patience=5, verbose=0, mode='auto')
 
-def train_cifar10(X, Y, epoch, batch, datagen):
+def train_cifar10(X, Y, Xv, Yv, epoch, batch, datagen):
     #Training
     model.fit_generator(datagen.flow(X, Y, batch_size=batch), callbacks=[es]
-                        ,samples_per_epoch=len(X), nb_epoch=epoch)
+                        ,samples_per_epoch=len(X), validation_data=(Xv,Yv), nb_epoch=epoch)
     #model.fit(xtrain[train], ytrain[train], batch_size=300, nb_epoch=100)
     return model
 
@@ -68,6 +68,10 @@ ytrain = np.transpose(temp, (2,0,1)).reshape(5000,10)
 
 #shuffle for validation
 xtrain, ytrain = shuffle(xtrain, ytrain, random_state = 0)
+xvali = xtrain[4500:4599]
+yvali = ytrain[4500:4599]
+xtrain = xtrain[0:4499]
+ytrain = ytrain[0:4499]
 #fix random seed for reproducibility
 #seed = 7
 #np.random.seed(seed)
@@ -81,10 +85,10 @@ datagen = ImageDataGenerator(
     height_shift_range=0.02)  # randomly shift images vertically (fraction of total height)
 
 #Start training
-while(len(unlabel) > 8000):
+for i in range(int(sys.argv[1])):
     epoch = 60
     batch = 300
-    model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
+    model = train_cifar10(xtrain, ytrain, xvali, yvali, epoch, batch, datagen)
     #for train, test in kfold.split(xtrain, ytrain):
     if (len(unlabel)==0):
         break
@@ -106,20 +110,5 @@ while(len(unlabel) > 8000):
 
 epoch = 30
 batch = 500
-model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
-
-test_result = model.predict(xtest, batch_size=100, verbose=0)
-total = np.array([0]*10)
-#output file
-output = open(sys.argv[1], "w+")
-output.write("ID,class\n")
-
-for i in range(len(test_result)):
-    total[int(np.argmax(test_result[i]))] += 1
-    line = str(i) + "," + str(int(np.argmax(test_result[i]))) + "\n"
-    output.write(line)
-output.close()
-
-print(total)
-print("Output file:", sys.argv[1]) 
+model = train_cifar10(xtrain, ytrain, xvali, yvali, epoch, batch, datagen)
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # coding=utf-8
 ##############################################################
- # File Name : semi-super_fast.py
- # Purpose : Use the data process by numpy and do the semi-supervise learing 
+ # File Name : semi_auto.py
+ # Purpose : Use the data process by numpy and do the autoencoder-SVM learing 
  # Creation Date : Fri 11 Nov 2016 04:50:40 PM CST
- # Last Modified : Fri 18 Nov 2016 16:00:09 CST
+ # Last Modified : Fri 18 Nov 2016 16:44:22 CST
  # Created By : SL Chung
 ##############################################################
 import numpy as np
@@ -14,32 +14,31 @@ import sys
 from sklearn.utils import shuffle
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation
-from keras.layers import Convolution2D, MaxPooling2D, Flatten
+from keras.layers.core import Dropout, Activation
+from keras.layers import Convolution2D, MaxPooling2D, Flatten, UpSampling2D, Reshape
 from keras.layers.normalization import BatchNormalization
-from keras.optimizers import Adam
+from keras.optimizers import Adam, Adadelta
 from keras.callbacks import EarlyStopping
+from keras.layers import Input, Dense
+from keras.models import Model
 
 model = Sequential()
 #Convolution
-model.add(Convolution2D(30, 5, 5, border_mode='valid', input_shape=(3, 32, 32)))
+model.add(Convolution2D(10, 2, 2, border_mode='same', input_shape=(8, 4, 4)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D((2,2)))
 
-model.add(Convolution2D(50, 3, 3))
+model.add(Convolution2D(30, 2, 2))
 model.add(Activation('relu'))
+model.add(Dropout(0.1))
 
-model.add(Convolution2D(80, 3, 3))
-model.add(Activation('relu'))
-model.add(MaxPooling2D((2,2)))
-model.add(Dropout(0.25))
 
 model.add(Flatten())
 model.add(BatchNormalization(epsilon=1e-05, mode=0, axis=-1, momentum=0.99, weights=None, beta_init='zero',
                    gamma_init='one', gamma_regularizer=None, beta_regularizer=None))
 #Fully connected
 model.add(Dense(100))
-model.add(Activation('relu'))
+model.add(Activation('sigmoid'))
 model.add(Dropout(0.1))
 model.add(Dense(10))
 model.add(Activation('softmax'))
@@ -48,13 +47,37 @@ model.summary()
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 es=EarlyStopping(monitor='loss', min_delta=0.00001, patience=5, verbose=0, mode='auto')
 
-def train_cifar10(X, Y, epoch, batch, datagen):
+def train_cifar10(X, Y, epoch, batch):
     #Training
-    datagen.fit(X)
-    model.fit_generator(datagen.flow(X, Y, batch_size=batch), callbacks=[es]
-                        ,samples_per_epoch=len(X), nb_epoch=epoch)
+    model.fit(X, Y, batch_size=batch, callbacks=[es], nb_epoch=epoch)
     #model.fit(xtrain[train], ytrain[train], batch_size=300, nb_epoch=100)
     return model
+
+input_img = Input(shape=(3, 32, 32))
+
+x = Convolution2D(30, 5, 5, activation='relu', border_mode='same')(input_img)
+x = MaxPooling2D((2, 2), border_mode='same')(x)
+x = Convolution2D(15, 3, 3, activation='relu', border_mode='same')(x)
+x = Convolution2D(15, 3, 3, activation='relu', border_mode='same')(x)
+x = MaxPooling2D((2, 2), border_mode='same')(x)
+x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(x)
+encoded = MaxPooling2D((2, 2), border_mode='same')(x)
+# at this point the representation is (8, 4, 4) i.e. 128-dimensional
+
+
+x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(encoded)
+x = UpSampling2D((2, 2))(x)
+x = Convolution2D(15, 3, 3, activation='relu', border_mode='same')(x)
+x = Convolution2D(15, 3, 3, activation='relu', border_mode='same')(x)
+x = UpSampling2D((2, 2))(x)
+x = Convolution2D(30, 3, 3, activation='relu', border_mode='same')(x)
+x = UpSampling2D((2, 2))(x)
+decoded = Convolution2D(3, 3, 3, activation='relu', border_mode='same')(x)
+
+autoencoder = Model(input_img, decoded)
+encoder = Model(input_img, encoded)
+
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
 
 label = np.load("./Label.npy")      #10-500-3072
 unlabel = np.load("./Unlabel.npy")  #45000-3072
@@ -68,21 +91,22 @@ unlabel = np.vstack((unlabel, xtest))
 temp = np.array([np.identity(10, dtype=int)]*500)
 ytrain = np.transpose(temp, (2,0,1)).reshape(5000,10)
 
+epoch = 50
+batch = 300
+autoencoder.fit(xtrain, xtrain, batch_size=batch, nb_epoch=epoch)
+
+unlabel = encoder.predict(unlabel)
+xtrain = encoder.predict(xtrain)
+
 #shuffle for validation
 xtrain, ytrain = shuffle(xtrain, ytrain, random_state = 0)
-#fix random seed for reproducibility
-
-datagen = ImageDataGenerator(
-    rotation_range=5,  # randomly rotate images in the range (degrees, 0 to 180)
-    width_shift_range=0.02,   # randomly shift images horizontally (fraction of total width)
-    height_shift_range=0.02)  # randomly shift images vertically (fraction of total height)
 
 #Start training
 each = 500
 while(len(unlabel) > 8000):
-    epoch = 80
+    epoch = 200
     batch = 300
-    model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
+    model = train_cifar10(xtrain, ytrain, epoch, batch)
     if (len(unlabel)==0):
         break
     else:
@@ -90,7 +114,7 @@ while(len(unlabel) > 8000):
 
         temp_max = unlabel_result.max(axis=1)
         #get the confident data(maybe the right answer)
-        confident_data = ((temp_max > (0.8) )*1).nonzero()[0]
+        confident_data = ((temp_max > 0.8)*1).nonzero()[0]
         #only get the answer for confident data
         class_max = unlabel_result.argmax(axis=1)[confident_data]
         
@@ -104,8 +128,8 @@ while(len(unlabel) > 8000):
         #index for confident_data
         adding_index_max = np.array(())
         for i in range(10):
-            adding_index_max = np.hstack(( np.random.choice((class_max == i).nonzero()[0], increase, replace=True),
-                               adding_index_max))
+            adding_index_max = np.hstack(( np.random.choice((class_max == i).nonzero()[0],
+                                increase, replace=True), adding_index_max))
         adding_index_max = adding_index_max.astype(int)
         
         #remove some of the confident_data the unlabel 
@@ -119,11 +143,9 @@ while(len(unlabel) > 8000):
 
     print(len(xtrain))
 
-epoch = 40
+epoch = 50
 batch = 500
-model = train_cifar10(xtrain, ytrain, epoch, batch, datagen)
+model = train_cifar10(xtrain, ytrain, epoch, batch)
 
-
-model_file = open(sys.argv[2], "wb+")
-pickle.dump(model, model_file)
-model_file.close()
+model.save(sys.argv[1]+'.h5')
+encoder.save(sys.argv[2]+'.h5')
