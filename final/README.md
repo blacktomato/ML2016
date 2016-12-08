@@ -1,6 +1,6 @@
 #File Content
 *   **click\_train.csv:**
-      display_id,ad_id,clicked
+    display_id,ad_id,clicked
     
     1,42337,0
 
