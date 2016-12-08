@@ -1,15 +1,15 @@
 #File Content
-*   click\_train.csv
-    display_id,ad_id,clicked
+*   **click\_train.csv:**
+      display_id,ad_id,clicked
     
     1,42337,0
 
-*   clicks\_test.csv
+*   **clicks\_test.csv**
     display_id,ad_id
     
     16874594,66758
 
-*   promoted\_content.csv
+*   **promoted\_content.csv**
     ad_id,document_id,compaign_id,advertiser_id
     
     1,6614,1,7
