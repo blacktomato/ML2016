@@ -4,7 +4,7 @@
  # File Name : preprocess_event.py
  # Purpose :
  # Creation Date : Sat 10 Dec 2016 03:56:32 PM CST
- # Last Modified : Sat 10 Dec 2016 05:14:50 PM CST
+ # Last Modified : Sat 10 Dec 2016 05:27:02 PM CST
  # Created By : SL Chung
 ##############################################################
 import sys
@@ -28,5 +28,5 @@ with open(sys.argv[1] + '/events.csv') as fp:
 
         Event[int(i[0])] = [int(i[2]), date.day % 7, date.hour, int(plat)]
 
-np.save("event_nparray.npy", Event)
+np.save(sys.argv[1] + "/event_nparray", Event)
 

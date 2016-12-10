@@ -4,7 +4,7 @@
  # File Name : preprocess_ad.py
  # Purpose :
  # Creation Date : Sat 10 Dec 2016 09:05:21 AM GMT
- # Last Modified : Sat 10 Dec 2016 05:07:12 PM CST
+ # Last Modified : Sat 10 Dec 2016 05:26:39 PM CST
  # Created By : SL Chung
 ##############################################################
 import sys
@@ -19,4 +19,4 @@ with open(sys.argv[1] + '/promoted_content.csv') as fp:
         i = line.split(",")
         Ad[int(i[0])] = [int(i[1]), int(i[2]), int(i[3])]
 
-np.save("ad_nparray.npy", Ad)
+np.save(sys.argv[2] + "/ad_nparray", Ad)
