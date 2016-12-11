@@ -27,14 +27,14 @@ n = 0
 train_n = 0
 valid_n = 0 
 with open(sys.argv[1] + '/click_train.csv') as fp:
-    next(fp)
+    event = Event[int(i[0])]
+    ad = Ad[int(i[1])]
+    display = np.hstack((Document[event[0]], event[1:]))
+    ad      = np.hstack((Document[   ad[0]],    ad[1:]))
+    
+    next(fp)    
     for line in fp:
         i = line.split(",")
-        
-        event = Event[int(i[0])]
-        ad = Ad[int(i[1])]
-        display = np.hstack((Document[event[0]], event[1:]))
-        ad      = np.hstack((Document[   ad[0]],    ad[1:]))
         
         if(is_train[n]):
             train_data[train_n] = np.hstack((display, ad))
