@@ -4,7 +4,7 @@
  # File Name : preprocess_train.py
  # Purpose : Preprocess click_train.csv
  # Creation Date : Sun 11 Dec 2016 01:33:31 PM CST
- # Last Modified : Sun 11 Dec 2016 03:10:27 PM CST
+ # Last Modified : Sun 11 Dec 2016 04:17:40 PM CST
  # Created By : SL Chung
 ##############################################################
 import sys
@@ -12,8 +12,7 @@ import numpy as np
 from sklearn.utils import shuffle
 
 is_train = np.hstack((np.array([ True]*69713385), np.array([False]*17428346) ))
-shuffle(index, random_state = 0)
-shuffle(is_train)
+shuffle(is_train, random_state = 0)
 
 train_data = np.array([[0.0]*799] * 69713385 )
 train_ans  = np.array([[0]*2]      * 69713385 )
