@@ -12,8 +12,7 @@ import numpy as np
 from sklearn.utils import shuffle
 
 is_train = np.hstack((np.array([ True]*69713385), np.array([False]*17428346) ))
-shuffle(index, random_state = 0)
-shuffle(is_train)
+shuffle(is_train, random_state = 0)
 
 train_data = np.array([[0.0]*799] * 69713385 )
 train_ans  = np.array([[0]*2]      * 69713385 )
