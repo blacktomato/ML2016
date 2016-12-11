@@ -25,11 +25,11 @@ np.save(sys.argv[1]+"/Ad_detail", Ad)
 c = np.identity(97)
 t = np.identity(300)
 
-Document = np.array([[0.0]*397] * 3000000)
+Document = np.zeros((3000000, 397))
 print("Preprocessing the category")
 n = 0
-category   = np.array([[        0,           0]] * 5481475)
-P_category = np.array([[                   0.0]] * 5481475)
+category   = np.zeros((5481475, 2).astype('int64')
+P_category = np.array(5481475)
 with open(sys.argv[1] + '/documents_categories.csv') as fp:
     next(fp)
     for line in fp:

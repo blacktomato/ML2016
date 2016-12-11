@@ -11,13 +11,18 @@ import sys
 import numpy as np
 from sklearn.utils import shuffle
 
-is_train = np.hstack((np.array([ True]*69713385), np.array([False]*17428346) ))
+# is_train = np.hstack((np.ones(69713385), np.zeros(17428346))).astype('bool')
+is_train = np.hstack((np.ones(26999349), np.zeros(6749837))).astype('bool')
 shuffle(is_train, random_state = 0)
 
-train_data = np.array([[0.0]*799] * 69713385 )
-train_ans  = np.array([[0]*2]      * 69713385 )
-valid_data = np.array([[0.0]*799] * 17428346 )
-valid_ans  = np.array([[0]*2]      * 17428346 )
+# train_data = np.array((69713385, 799))
+# train_ans  = np.array((69713385, 2))
+# valid_data = np.array((69713385, 799))
+# valid_ans  = np.array((69713385, 2))
+train_data = np.array((26999349, 799))
+train_ans  = np.array((26999349, 2))
+valid_data = np.array((6749837, 799))
+valid_ans  = np.array((6749837, 2))
 
 #reading Event    [23120127 :   4]
 #reading Document [ 3000000 : 397]

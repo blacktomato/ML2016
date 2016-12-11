@@ -3,8 +3,8 @@ import random
 import numpy as np
 from sklearn.utils import shuffle
 
-with open(sys.argv[1] + '/click_train.csv') as fp:
-    ofp = open(sys.argv[2] + 'click_train_small.csv')
+with open(sys.argv[1] + '/clicks_train.csv', 'r') as fp:
+    ofp = open(sys.argv[2] + 'clicks_train_small.csv', 'w+')
     lines = fp.readlines()
 
     line = lines[0]
@@ -28,10 +28,10 @@ with open(sys.argv[1] + '/click_train.csv') as fp:
         # if last of the same display_id
         if(line == lines[-1] or lines[line_id + 1].split(",")[0] != i[0]):
             if(len(unclicks) != 0):
-                selected.append(random.choose(unclicks))
+                selected.append(random.choice(unclicks))
                 
                 # write in first selected line
-                line_1 = random.choose(selected)
+                line_1 = random.choice(selected)
                 ofp.write(line_1)
                 # write in second selected line
                 selected.remove(line_1)
