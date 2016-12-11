@@ -40,7 +40,7 @@ with open(sys.argv[1] + '/documents_categories.csv') as fp:
 
 allcate = np.bincount(category[:, 1]).nonzero()[0]
 c_dict = dict(enumerate(allcate))
-rc_dict = dict((v, k) for k, v in c_dict.iteritems())
+rc_dict = dict((v, k) for k, v in c_dict.items())
 
 for n in range(len(category)):
     Document[category[n][0]][:97] += c[rc_dict[category[n][1]]] * P_category[n] 
