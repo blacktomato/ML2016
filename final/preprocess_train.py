@@ -4,15 +4,17 @@
  # File Name : preprocess_train.py
  # Purpose : Preprocess click_train.csv
  # Creation Date : Sun 11 Dec 2016 01:33:31 PM CST
- # Last Modified : Sun 11 Dec 2016 03:10:27 PM CST
+ # Last Modified : Mon 12 Dec 2016 12:57:47 AM CST
  # Created By : SL Chung
 ##############################################################
 import sys
 import numpy as np
 from sklearn.utils import shuffle
+from numpy import genfromtxt
 
 # is_train = np.hstack((np.ones(69713385), np.zeros(17428346))).astype('bool')
-is_train = np.hstack((np.ones(26999349), np.zeros(6749837))).astype('bool')
+#is_train = np.hstack((np.ones(26999349), np.zeros(6749837))).astype('bool')
+is_train = np.arange(33749186)
 shuffle(is_train, random_state = 0)
 
 # train_data = np.zeros((69713385, 799))
@@ -33,24 +35,21 @@ train_n = 0
 valid_n = 0 
 
 print("Processing data")
-# with open(sys.argv[1] + '/clicks_train.csv') as fp:
-with open(sys.argv[2] + '/clicks_train_small.csv') as fp:
-    next(fp)    
-    for line in fp:
-        i = line.split(",")
-        
-        event = Event[int(i[0])]
-        ad = Ad[int(i[1])]
-        display = np.hstack((Document[event[0]], event[1:]))
-        ad      = np.hstack((Document[   ad[0]],    ad[1:]))
-    
-        if(is_train[n]):
-            train_data[train_n] = np.hstack((display, ad))
-            train_ans[train_n][int(i[2])] = 1
-            train_n += 1
-        else:
-            valid_data[valid_n] = np.hstack((display, ad))
-            valid_ans[valid_n][int(i[2])] = 1
-            valid_n += 1
-        
-        n += 1
+#with open(sys.argv[1] + '/clicks_train.csv') as fp:
+
+click_train = genfromtxt(sys.argv[2] + '/clicks_train_small.csv',
+                         delimiter=',', dtype='int64', skip_header=1)
+
+#train_data        
+event = Event[click_train[:, 0]]
+ad = Ad[click_train[:, 1]]
+display = np.hstack((Document[event[:, 0]], event[:, 1:]))
+ad      = np.hstack((Document[   ad[:, 0]],    ad[:, 1:]))
+data    = np.hstack((display, ad))
+ans     = np.hstack((click_train[:, 2], 1 - click_train[:, 2])) 
+
+train_data = data[is_train[:26999349]]
+train_ans  =  ans[is_train[:26999349]]
+            
+valid_data = data[is_train[26999349:]]
+valid_ans  =  ans[is_train[26999349:]]
