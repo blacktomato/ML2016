@@ -2,9 +2,9 @@
 # coding=utf-8
 ##############################################################
  # File Name : preprocess_event.py
- # Purpose :
+ # Purpose : Preprocess event.csv
  # Creation Date : Sat 10 Dec 2016 03:56:32 PM CST
- # Last Modified : Sat 10 Dec 2016 05:27:02 PM CST
+ # Last Modified : Sun 11 Dec 2016 01:30:52 PM CST
  # Created By : SL Chung
 ##############################################################
 import sys

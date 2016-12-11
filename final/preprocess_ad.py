@@ -2,9 +2,9 @@
 # coding=utf-8
 ##############################################################
  # File Name : preprocess_ad.py
- # Purpose :
+ # Purpose : Preprocess promoted_content.csv
  # Creation Date : Sat 10 Dec 2016 09:05:21 AM GMT
- # Last Modified : Sat 10 Dec 2016 05:26:39 PM CST
+ # Last Modified : Sun 11 Dec 2016 01:32:05 PM CST
  # Created By : SL Chung
 ##############################################################
 import sys
