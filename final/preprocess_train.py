@@ -20,9 +20,9 @@ shuffle(is_train, random_state = 0)
 # valid_data = np.zeros((17428346, 799))
 # valid_ans  = np.zeros((17428346, 2))
 train_data = np.zeros((26999349, 799))
-train_ans  = np.zeros((26999349, 2))
+train_ans  = np.zeros((26999349, 2)).astype('int64')
 valid_data = np.zeros((6749837, 799))
-valid_ans  = np.zeros((6749837, 2))
+valid_ans  = np.zeros((6749837, 2)).astype('int64')
 
 #reading Event    [23120127 :   4]
 #reading Document [ 3000000 : 397]
@@ -31,6 +31,8 @@ valid_ans  = np.zeros((6749837, 2))
 n = 0
 train_n = 0
 valid_n = 0 
+
+print("Processing data")
 # with open(sys.argv[1] + '/clicks_train.csv') as fp:
 with open(sys.argv[2] + '/clicks_train_small.csv') as fp:
     next(fp)    
