@@ -25,7 +25,7 @@ np.save(sys.argv[1]+"/Ad_detail", Ad)
 c = np.identity(97)
 t = np.identity(300)
 
-document = np.array([[0.0]*397] * 3000000)
+Document = np.array([[0.0]*397] * 3000000)
 print("Preprocessing the category")
 n = 0
 category   = np.array([[        0,           0]] * 5481475)
@@ -43,7 +43,7 @@ c_dict = dict(enumerate(allcate))
 rc_dict = dict((v, k) for k, v in c_dict.iteritems())
 
 for n in range(len(category)):
-    document[category[n][0]][:97] += c[rc_dict[category[n][1]]] * P_category[n] 
+    Document[category[n][0]][:97] += c[rc_dict[category[n][1]]] * P_category[n] 
 
 print("Preprocessing the topic")
 n = 0
@@ -51,7 +51,7 @@ with open(sys.argv[1] + '/documents_topics.csv') as fp:
     next(fp)
     for line in fp:
         i = line.split(",")
-        document[int(i[0])][97:397] += t[int(i[1])] * float(i[2]) 
+        Document[int(i[0])][97:397] += t[int(i[1])] * float(i[2]) 
         n += 1
 
 '''

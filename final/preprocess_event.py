@@ -28,5 +28,5 @@ with open(sys.argv[1] + '/events.csv') as fp:
 
         Event[int(i[0])] = [int(i[2]), date.day % 7, date.hour, int(plat)]
 
-np.save(sys.argv[1] + "/event_nparray", Event)
+# np.save(sys.argv[2] + "/event_nparray", Event)
 

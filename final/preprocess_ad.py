@@ -19,4 +19,4 @@ with open(sys.argv[1] + '/promoted_content.csv') as fp:
         i = line.split(",")
         Ad[int(i[0])] = [int(i[1]), int(i[2]), int(i[3])]
 
-np.save(sys.argv[2] + "/ad_nparray", Ad)
+# np.save(sys.argv[2] + "/ad_nparray", Ad)
