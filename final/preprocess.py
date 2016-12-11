@@ -28,8 +28,8 @@ t = np.identity(300)
 Document = np.zeros((3000000, 397))
 print("Preprocessing the category")
 n = 0
-category   = np.zeros((5481475, 2).astype('int64')
-P_category = np.array(5481475)
+category   = np.zeros((5481475, 2)).astype('int64')
+P_category = np.zeros(5481475)
 with open(sys.argv[1] + '/documents_categories.csv') as fp:
     next(fp)
     for line in fp:
