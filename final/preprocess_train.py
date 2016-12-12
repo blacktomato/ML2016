@@ -51,7 +51,7 @@ ad = Ad[click_train[:, 1]]
 display = np.hstack((Document[event[:, 0]], event[:, 1:]))
 ad      = np.hstack((Document[   ad[:, 0]],    ad[:, 1:]))
 data    = np.hstack((display, ad))
-ans     = np.hstack((click_train[:, 2], 1 - click_train[:, 2])) 
+ans     = np.vstack((click_train[:, 2], 1 - click_train[:, 2])).T 
 
 train_data = data[is_train[:2699934]]
 train_ans  =  ans[is_train[:2699934]]
