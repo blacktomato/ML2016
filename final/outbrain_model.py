@@ -34,32 +34,32 @@ def build_model(shape):
     # Sequential
     model = Sequential()
     model.add(Dense(512, input_shape=(shape,)))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
     model.add(Dense(512))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
     model.add(Dense(1024))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
     model.add(Dense(1024))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
     model.add(Dense(256))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
     model.add(Dense(256))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
