@@ -4,7 +4,7 @@
  # File Name : preprocess_train.py
  # Purpose : Preprocess click_train.csv
  # Creation Date : Sun 11 Dec 2016 01:33:31 PM CST
- # Last Modified : Mon 12 Dec 2016 12:57:47 AM CST
+ # Last Modified : Tue 13 Dec 2016 12:50:58 AM CST
  # Created By : SL Chung
 ##############################################################
 import sys
@@ -44,6 +44,8 @@ display = np.hstack((Document[event[:, 0]], event[:, 1:]))
 ad      = np.hstack((Document[   ad[:, 0]],    ad[:, 1:]))
 data    = np.hstack((display, ad))
 ans     = np.hstack((click_train[:, 2], 1 - click_train[:, 2])) 
+
+data = (data - np.mean(data, axiz=0)) / np.std(data, axiz=0)
 
 train_data = data[is_train[:2699934]]
 train_ans  =  ans[is_train[:2699934]]
