@@ -26,13 +26,14 @@ shuffle(is_train, random_state = 0)
 #reading Document [ 3000000 : 397]
 #reading Ad       [  573099 :   3]
 
-print("Processing data")
+print("Loading")
 #with open(sys.argv[1] + '/clicks_train.csv') as fp:
 
 click_data = genfromtxt(sys.argv[2] + '/clicks_train_small.csv',
                          delimiter=',', dtype='int64', skip_header=1)
 
 #train_data        
+print("Processing data")
 click_train = click_data[is_train[:1687459]]
 event = Event[click_train[:, 0]]
 ad = Ad[click_train[:, 1]]
