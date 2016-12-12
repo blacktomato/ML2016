@@ -48,8 +48,8 @@ model.load_weights(sys.argv[2]+'.hdf5')
 prob = model.predict_proba(testData, batch_size=batchSize)
 
 #count how many times a particular display_id appear
-idCount = np.bincount(allData[:,0])
-disId = np.unique(allData[:,0])
+idCount = np.bincount(clickTest[:,0])
+disId = np.unique(clickTest[:,0])
 
 start = 0
 end = 0
