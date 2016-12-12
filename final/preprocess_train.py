@@ -4,11 +4,7 @@
  # File Name : preprocess_train.py
  # Purpose : Preprocess click_train.csv
  # Creation Date : Sun 11 Dec 2016 01:33:31 PM CST
-<<<<<<< HEAD
  # Last Modified : Mon 12 Dec 2016 12:57:47 AM CST
-=======
- # Last Modified : Sun 11 Dec 2016 04:17:40 PM CST
->>>>>>> master
  # Created By : SL Chung
 ##############################################################
 import sys
@@ -16,13 +12,9 @@ import numpy as np
 from sklearn.utils import shuffle
 from numpy import genfromtxt
 
-<<<<<<< HEAD
 # is_train = np.hstack((np.ones(69713385), np.zeros(17428346))).astype('bool')
 #is_train = np.hstack((np.ones(26999349), np.zeros(6749837))).astype('bool')
 is_train = np.arange(33749186)
-=======
-is_train = np.hstack((np.array([ True]*69713385), np.array([False]*17428346) ))
->>>>>>> master
 shuffle(is_train, random_state = 0)
 
 # train_data = np.zeros((69713385, 799))

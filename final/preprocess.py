@@ -9,26 +9,11 @@
 ##############################################################
 import sys
 import numpy as np
-#c = np.identity(97)
-#t = np.identity(300)
 
-document = {}
-
-<<<<<<< HEAD
-with open(sys.argv[1] + '/promoted_content.csv') as fp:
-    next(fp)
-    for line in fp:
-        i = line.split(",")
-        Ad[int(i[0])] = [int(i[1]), int(i[2]), int(i[3])]
-
-np.save(sys.argv[1]+"/Ad_detail", Ad)
-'''
 c = np.identity(97)
 t = np.identity(300)
 
 Document = np.zeros((3000000, 397))
-=======
->>>>>>> master
 print("Preprocessing the category")
 n = 0
 category   = np.zeros((5481475, 2)).astype('int64')
@@ -48,15 +33,7 @@ rc_dict = dict((v, k) for k, v in c_dict.items())
 
 print("Store in document")
 for n in range(len(category)):
-<<<<<<< HEAD
     Document[category[n][0]][:97] += c[rc_dict[category[n][1]]] * P_category[n] 
-=======
-    element = (rc_dict[category[n][1]], P_category[n])
-    if (category[n][0] in document):
-        document[category[n][0]].append([element])
-    else:
-        document[category[n][0]] = [element]
->>>>>>> master
 
 print("Preprocessing the topic")
 n = 0
@@ -64,14 +41,6 @@ with open(sys.argv[1] + '/documents_topics.csv') as fp:
     next(fp)
     for line in fp:
         i = line.split(",")
-<<<<<<< HEAD
         Document[int(i[0])][97:397] += t[int(i[1])] * float(i[2]) 
-=======
-        element = (int(i[1])+97, float(i[2]))
-        if (int(i[0]) in document):
-            document[int(i[0])].append([element])
-        else:
-            document[int(i[0])] = [element]
->>>>>>> master
         n += 1
 
