@@ -8,6 +8,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.1
 sess = tf.Session(config=config)
 from keras import backend as K
 K.set_session(sess)
+keras.backend.get_session().run(tf.initialize_all_variables())
 import sys
 import pickle
 import numpy as np
