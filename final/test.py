@@ -59,7 +59,7 @@ with open(file_dir, 'w') as f:
     for ID in disId:
         end += idCount[ID]
         #only use the clicking probability (that means class 1)
-        order = np.argsort(prob[start:end,1])
+        order = np.argsort(prob[start:end,1])[::-1]
         adOrder = clickTest[order+strat] 
         start = end
         f.write(str(ID))+','+' '.join(map(str, adOrder))+'\n') 
