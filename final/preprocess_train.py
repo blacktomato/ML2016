@@ -30,17 +30,14 @@ valid_ans  = np.zeros((6749837, 2)).astype('int64')
 #reading Document [ 3000000 : 397]
 #reading Ad       [  573099 :   3]
 
-n = 0
-train_n = 0
-valid_n = 0 
-
 print("Processing data")
 #with open(sys.argv[1] + '/clicks_train.csv') as fp:
 
-click_train = genfromtxt(sys.argv[2] + '/clicks_train_small.csv',
+click_data = genfromtxt(sys.argv[2] + '/clicks_train_small.csv',
                          delimiter=',', dtype='int64', skip_header=1)
 
 #train_data        
+click_train = click_data[is_train[:3374918]]
 event = Event[click_train[:, 0]]
 ad = Ad[click_train[:, 1]]
 display = np.hstack((Document[event[:, 0]], event[:, 1:]))
@@ -48,8 +45,8 @@ ad      = np.hstack((Document[   ad[:, 0]],    ad[:, 1:]))
 data    = np.hstack((display, ad))
 ans     = np.hstack((click_train[:, 2], 1 - click_train[:, 2])) 
 
-train_data = data[is_train[:26999349]]
-train_ans  =  ans[is_train[:26999349]]
+train_data = data[is_train[:2699934]]
+train_ans  =  ans[is_train[:2699934]]
             
-valid_data = data[is_train[26999349:]]
-valid_ans  =  ans[is_train[26999349:]]
+valid_data = data[is_train[2699934:3374918]]
+valid_ans  =  ans[is_train[2699934:3374918]]
