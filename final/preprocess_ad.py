@@ -10,8 +10,9 @@
 import sys
 import numpy as np
 
-#              document_id  campaign_id  advertiser_id  
-Ad = np.array([[         0,           0,             0]] * 573099)
+#                document_id  campaign_id  advertiser_id  
+# Ad = np.array([[         0,           0,             0]] * 573099)
+Ad = np.zeros((573099, 3)).astype('int64')
 
 with open(sys.argv[1] + '/promoted_content.csv') as fp:
     next(fp)
@@ -19,4 +20,4 @@ with open(sys.argv[1] + '/promoted_content.csv') as fp:
         i = line.split(",")
         Ad[int(i[0])] = [int(i[1]), int(i[2]), int(i[3])]
 
-np.save(sys.argv[2] + "/ad_nparray", Ad)
+# np.save(sys.argv[2] + "/ad_nparray", Ad)
