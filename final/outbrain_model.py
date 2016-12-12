@@ -76,8 +76,9 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint, early_stopping]
 
-model.fit(TrainX, TrainY, batch_size=batchSize, nb_epoch=nbEpoch, 
-          callbacks=callbacks_list,verbose=1, validation_data=(ValX, ValY))
+model = build_model(799)
+model.fit(train_data, train_ans, batch_size=batchSize, nb_epoch=nbEpoch, 
+          callbacks=callbacks_list,verbose=1, validation_data=(valid_data, valid_ans))
 
 model_json = model.to_json()
 with open('model.json', 'w') as json_file:
