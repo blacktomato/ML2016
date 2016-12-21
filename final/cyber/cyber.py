@@ -3,8 +3,8 @@ import os
 import tensorflow as tf
 tf.python.control_flow_ops = tf
 config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-config.gpu_options.per_process_gpu_memory_fraction = 0.1
+#config.gpu_options.allow_growth = True
+#config.gpu_options.per_process_gpu_memory_fraction = 0.1
 sess = tf.Session(config=config)
 from keras import backend as K
 K.set_session(sess)
@@ -26,7 +26,7 @@ from collections import Counter
 # Constant define
 batchSize = 1000
 classNum = 5
-nbEpoch = 20
+nbEpoch = 10
 val = 4e4
 trainSize = 3.9e6
 order = [3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
@@ -36,17 +36,17 @@ def build_model(shape):
     model = Sequential()
     model.add(Dense(40, input_shape=(shape,)))
     #model.add(BatchNormalization())
-    model.add(Activation('elu'))
+    model.add(Activation('relu'))
     #model.add(Dropout(0.25))
 
     model.add(Dense(20))
     #model.add(BatchNormalization())
-    model.add(Activation('elu'))
+    model.add(Activation('relu'))
     #model.add(Dropout(0.25))
     
     model.add(Dense(10))
     #model.add(BatchNormalization())
-    model.add(Activation('elu'))
+    model.add(Activation('relu'))
     #model.add(Dropout(0.25))
 
     '''
@@ -86,12 +86,13 @@ file.close()
 
 #protocal, server, flag, attackType are used to store the corresponding feature in the file 'train'  
 file = open(sys.argv[1]+'/train', 'r')
-data = []
 protocal, server, flag, attackType = [], [], [], []
 server.append('icmp') #not appear in training data but in testing data
-
+data = []
 print('start parsing')
 lines = file.readlines()
+#data = np.zeros((len(lines),38))
+
 for line in lines:
     #line = file.readline()
     line = line.strip().strip('.').split(',')
@@ -99,8 +100,19 @@ for line in lines:
     server.append(line[2])
     flag.append(line[3])
     attackType.append(line[-1])
-file.close()
+    
+    del line[-1]
+    #del line[12:22]
+    #del line[6:11]
+    del line[19]
+    del line[1:4]
 
+    data.append([int(float(a)) for a in line])
+file.close()
+del lines
+data = np.asarray(data).astype('float32')
+data = (data-np.mean(data,axis=0))/np.std(data,axis=0)
+print(data[1])
 #Counter is used to count the numbers of different elemnet in the list
 #Counter(*).keys() return all the different element in the list 
 print('create dictionary for protocal, server, flag, attackType')
@@ -135,13 +147,23 @@ print('integer to hard 1')
 pi, si, fi = np.identity(len(pk)), np.identity(len(sk)), np.identity(len(fk))
 protocal, server, flag = pi[pl], si[sl], fi[fl]
 
+
 #concatenate protocal, server, flag
 print('concatenate server/protocal')
 trainData = np.concatenate((server, protocal),1)
+del protocal
+del server
 print(trainData.shape)
+
 print('concatenate data/flag')
 trainData = np.concatenate((trainData, flag),1)
+del flag
+
+print('concatenate data/data')
+#trainData = (trainData-np.mean(trainData,axis=0))/np.std(trainData,axis=0)
+trainData = np.concatenate((trainData, data),1)
 print(trainData.shape)
+del data
 #####################################################################################
 
 #print('saving model')
@@ -180,6 +202,10 @@ model_json = model.to_json()
 with open(sys.argv[2]+'.json', 'w') as json_file:
     json_file.write(model_json)
 #####################################################################################
+del TrainX
+del TrainY
+del ValX
+del ValY
 
 #for testing
 file = open(sys.argv[1]+'/test.in', 'r')
@@ -193,8 +219,17 @@ for line in lines:
     protocal.append(line[1])
     server.append(line[2])
     flag.append(line[3])
-file.close()
+    #del line[12:22]
+    #del line[6:11]
+    del line[19]
+    del line[1:4]
 
+    data2.append(line)
+file.close()
+del lines
+data2 = np.asarray(data2).astype('float32')
+data2 = (data2-np.mean(data2,axis=0))/np.std(data2,axis=0)
+file.close()
 pr, sr, fr = range(0,len(pk)), range(0,len(sk)), range(0, len(fk))
 print('string to hard 1')
 pl, sl, fl, al = [], [], [], []
@@ -211,6 +246,9 @@ print('concatenate server/protocal')
 testData = np.concatenate((server, protocal),1)
 print('concatenate data/flag')
 testData = np.concatenate((testData, flag),1)
+print('concatenate data/data')
+#testData = (testData-np.mean(testData,axis=0))/np.std(testData,axis=0)
+testData = np.concatenate((testData, data2),1)
 
 json_file = open(sys.argv[2]+'.json', 'r')
 loaded_model_json = json_file.read()
