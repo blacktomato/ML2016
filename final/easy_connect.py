@@ -4,7 +4,7 @@
  # File Name : easy_connect.py
  # Purpose :
  # Creation Date : Tue 27 Dec 2016 11:18:54 PM CST
- # Last Modified : Tue 27 Dec 2016 11:32:03 PM CST
+ # Last Modified : Tue 27 Dec 2016 11:43:37 PM CST
  # Created By : SL Chung
 ##############################################################
 import pandas as pd
@@ -32,14 +32,10 @@ test = pd.read_csv("./clicks_test.csv")
 
 test = pd.merge(test, d, on="display_id")
 del d
-test = test.drop("display_id", 1)
-test["temp"] = test.clicked.astype(str).str.cat(test.d.adtype(str),sep=" ")
-test = test.drop(["clicked","d"], 1)
 test=pd.merge(test, a, on="ad_id")
 del a
-test = test.drop("ad_id", 1)
-test["i"] = test.temp.astype(str).str.cat(test.a.adtype(str))
-test = test.drop(["temp","a"], 1)
+test["i"] = test.d.astype(str).str.cat(test.a.adtype(str))
+test = test.drop(["d","a"], 1)
 
 test = test.sort_values(["display_id","ad_id"])
 test = test.drop(["display_id","ad_id"], 1)
