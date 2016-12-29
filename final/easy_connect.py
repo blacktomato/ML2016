@@ -4,7 +4,7 @@
  # File Name : easy_connect.py
  # Purpose :
  # Creation Date : Tue 27 Dec 2016 11:18:54 PM CST
- # Last Modified : Wed 28 Dec 2016 12:57:50 AM CST
+ # Last Modified : Thu 29 Dec 2016 03:47:50 PM CST
  # Created By : SL Chung
 ##############################################################
 import pandas as pd
@@ -34,7 +34,8 @@ test = pd.merge(test, d, on="display_id")
 del d
 test=pd.merge(test, a, on="ad_id")
 del a
-test["i"] = test.d.astype(str).str.cat(test.a.astype(str))
+#add "0 " in the front of i
+test["i"] = ("0 " + test.d.astype(str)).str.cat(test.a.astype(str))
 test = test.drop(["d","a"], 1)
 
 test = test.sort_values(["display_id","ad_id"])
