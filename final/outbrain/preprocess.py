@@ -9,6 +9,7 @@
 ##############################################################
 import sys
 import numpy as np
+import datetime
 
 c = np.identity(97)
 t = np.identity(300)
@@ -43,4 +44,33 @@ with open(sys.argv[1] + '/documents_topics.csv') as fp:
         i = line.split(",")
         Document[int(i[0])][97:397] += t[int(i[1])] * float(i[2]) 
         n += 1
+
+
+print("Preprocessing event")
+Event = np.zeros((23120127, 4)).astype('int64')
+with open(sys.argv[1] + '/events.csv') as fp:
+    next(fp)
+    for line in fp:
+        i = line.split(",")
+#        geo = i[5].rstrip("\n").replace(">", "")
+#        geo = geo.replace("-", "")
+        plat = i[4]
+        if(not plat.isdigit()):
+            plat = "2"
+#        if len(geo) == 0:
+#            geo = "0"
+        trans_date = datetime.datetime
+        date = trans_date.fromtimestamp( (1465876799998 + int(i[3])) / 1000)
+
+        Event[int(i[0])] = [int(i[2]), date.day % 7, date.hour, int(plat)]
+
+
+print("Preprocessing ad")
+Ad = np.zeros((573099, 3)).astype('int64')
+
+with open(sys.argv[1] + '/promoted_content.csv') as fp:
+    next(fp)
+    for line in fp:
+        i = line.split(",")
+        Ad[int(i[0])] = [int(i[1]), int(i[2]), int(i[3])]
 
