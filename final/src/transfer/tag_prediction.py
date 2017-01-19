@@ -130,7 +130,7 @@ def get_words(text):
 # Declaration of variables for future usage                                    #
 # The file that has been preprocessed should be named as 'clean_test.csv'      #
 ################################################################################
-f = open('clean_test.csv', 'r')
+f = open('clean_' + sys.argv[1], 'r')
 reader = csv.reader(f)
 corpus = []
 id_list = []
@@ -147,7 +147,7 @@ for row in reader:
    words = get_words(row[1]+row[2])
    clean_row = ''
    for word in words:
-      if word.isalpha() and len(i) > 2:
+      if word.isalpha() and len(word) > 2:
          clean_row = clean_row + ' ' + word
    corpus.append(clean_row)
 print (str(time.time() - start_time) + 's')
@@ -160,7 +160,7 @@ print (str(time.time() - start_time) + 's')
 ################################################################################
 print ('Getting phrases...', end = '              ')
 start_time = time.time()
-vectorizer = CountVectorizer(stop_words=stop_words, max_df=0.3, min_df=50, max_features=10000, ngram_range=(2,2))
+vectorizer = TfidfVectorizer(stop_words=stop_words, max_df=0.3, min_df=50, max_features=10000, ngram_range=(2,2))
 tfidf = vectorizer.fit_transform(corpus)
 feature_names = vectorizer.get_feature_names()
 
@@ -181,11 +181,11 @@ print (str(time.time() - start_time) + 's')
 print ('Regenerating contents...', end = '        ')
 start_time = time.time()
 f.close()
-f = open('clean_test.csv', 'r')
+f = open('clean_' + sys.argv[1], 'r')
 reader = csv.reader(f)
 corpus = []
 reader.next()
-out_phrase = open('phrase_test.csv', 'w')
+out_phrase = open('phrase_' + sys.argv[1], 'w')
 writer = csv.writer(out_phrase)
 first = ['id', 'title', 'content']
 writer.writerow(first)
@@ -210,11 +210,11 @@ f.close()
 ################################################################################
 print ('Cleaning texts...', end = '              ')
 start_time = time.time()
-f = open('phrase_test.csv', 'r')
+f = open('phrase_' + sys.argv[1], 'r')
 reader = csv.reader(f)
 reader.next()
 
-outfile = open('output_exp.csv', 'w')
+outfile = open('output_exp_' + sys.argv[1], 'w')
 writer = csv.writer(outfile)
 first = ['id', 'tags']
 writer.writerow(first)
@@ -300,7 +300,7 @@ outfile.close()
 ################################################################################
 print ('Substitute abbreviations...', end = '     ')
 start_time = time.time()
-f = open('output_exp.csv', 'r')
+f = open('output_exp_' + sys.argv[1], 'r')
 reader = csv.reader(f)
 reader.next()
 
@@ -321,16 +321,17 @@ for phrase in phrases:
 
 
 f.close()
-f = open('output_exp.csv', 'r')
+f = open('output_exp_' + sys.argv[1], 'r')
 reader = csv.reader(f)
 reader.next()
 
-outfile = open('prediction.csv', 'w')
+outfile = open('prediction_' + sys.argv[1], 'w')
 writer = csv.writer(outfile)
 
 first = ['id', 'tags']
 writer.writerow(first)
 
+prediction_tags = {}
 for row in reader:
     out_tag = []
     tags = list(set(row[1].split()))
@@ -341,5 +342,7 @@ for row in reader:
             out_tag.append(tag)
     out_row = [row[0], " ".join(out_tag)]
     writer.writerow(out_row)
+    prediction_tags[int(row[0])] = out_tag
 
 print (str(time.time() - start_time) + 's')
+outfile.close()

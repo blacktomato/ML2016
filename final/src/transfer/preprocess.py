@@ -10,13 +10,14 @@ from string import digits
 from bs4 import BeautifulSoup
 np.set_printoptions(threshold=np.nan)
 
-f = open('test.csv', 'r')
+f = open(sys.argv[1], 'r')
 reader = csv.reader(f)
 corpus = []
 id_list = []
+true_tags = {}
 reader.next()
 
-outfile = open('clean_test.csv', 'w')
+outfile = open('clean_' + sys.argv[1], 'w')
 writer = csv.writer(outfile)
 first = ['id', 'title', 'content']
 writer.writerow(first)
@@ -26,8 +27,11 @@ for row in reader:
     id_list.append(row[0])
     title = unicodedata.normalize('NFKD', BeautifulSoup(row[1]).text).encode('ascii', 'ignore')
     content = unicodedata.normalize('NFKD', BeautifulSoup(row[2]).text).encode('ascii', 'ignore')
+    tag = unicodedata.normalize('NFKD', BeautifulSoup(row[3]).text).encode('ascii', 'ignore')
     title_sentences = title.split('\n')
     content_sentences = content.split('\n')
+    tags = tag.split(' ')
+    true_tags[int(row[0])] = tags
 
     out_title = ''
     flag = False

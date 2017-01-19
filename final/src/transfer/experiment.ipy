@@ -1,0 +1,4 @@
+%run preprocess.py $filename
+%run tag_prediction.py $filename
+%run util.py
+score(prediction_tags, true_tags)
