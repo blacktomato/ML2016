@@ -217,13 +217,36 @@ start_time = time.time()
 f = open('phrase_' + sys.argv[1], 'r')
 reader = csv.reader(f)
 reader.next()
+for row in reader:
+   words = get_words(row[1]+row[2])
+   clean_row = ''
+   for word in words:
+      if word.isalpha() and len(word) > 2:
+         clean_row = clean_row + ' ' + word
+   corpus.append(clean_row)
+
+vectorizer = CountVectorizer(stop_words=stop_words, max_df=0.3, min_df=50, max_features=10000, ngram_range=(1,1))
+tfidf = vectorizer.fit_transform(corpus)
+feature_names = vectorizer.get_feature_names()
+
+tfidf = tfidf.toarray()
+tfidf = np.asarray(tfidf)
+a = np.sum(tfidf, 0)
+phrase_indices = a.argsort()[-600:][::-1]
+phrase_candidates = []
+for i in phrase_indices:
+    phrase_candidates.append(feature_names[i])
+
+f.close()
+f = open('phrase_' + sys.argv[1], 'r')
+reader = csv.reader(f)
+reader.next()
 
 outfile = open('output_exp_' + sys.argv[1], 'w')
 writer = csv.writer(outfile)
 first = ['id', 'tags']
 writer.writerow(first)
 count = 0
-out_tags = {}
 
 for row in reader:
     # title
@@ -243,13 +266,15 @@ for row in reader:
     sentence2 = nltk.word_tokenize(sentence2)
     sent = pos_tag(sentence)
     sent2 = pos_tag(sentence2)
+    # print (sentence, sent)
+    # print (sentence2, sent2)
 
     new_title = ''
     new_content = ''
 
     # Leave only "noun-type" words in title
     for s in sent:
-        if s[1][0] == "N" and len(s[0]) > 2 and not s[0] in stop_words:
+        if len(s[0]) > 2 and not s[0] in stop_words:
             if '-' in s[0] and not len(filter(None, s[0].split('-'))) == 0:
                 if len(filter(None, s[0].split('-'))) == 1:
                     a = str(filter(None, s[0].split('-'))[0])
@@ -261,7 +286,7 @@ for row in reader:
 
     # Leave only "noun-type" words in content
     for s in sent2:
-        if s[1][0] == "N" and len(s[0]) > 2 and not s[0] in stop_words:
+        if len(s[0]) > 2 and not s[0] in stop_words:
             if '-' in s[0] and not len(filter(None, s[0].split('-'))) == 0:
                 if len(filter(None, s[0].split('-'))) == 1:
                     a = str(filter(None, s[0].split('-'))[0])
@@ -274,11 +299,14 @@ for row in reader:
     # Coution!!!!
     # Add only "phrases" in content!
     extra = ''
+    for word in new_title.split():
+        if word in phrase_candidates:
+            extra = extra + word + ' '
     for word in new_content.split():
         if word in phrase_candidates:
             extra = extra + word + ' '
 
-    tag = new_title + ' ' + extra
+    tag = extra
     tag = list(set(tag.split()))
 
     # If there is no output tag (all words are removed from above process)
@@ -294,7 +322,6 @@ for row in reader:
     # output
     out_row = [row[0], " ".join(tag)]
     writer.writerow(out_row)
-    out_tags[int(row[0])] = tag
 
 print (str(time.time() - start_time) + 's')
 outfile.close()

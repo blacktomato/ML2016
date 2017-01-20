@@ -9,7 +9,7 @@ def score(predictions, trues):
             total[1] += weight * f1(predictions[key], trues[key])
         else:
             total[1] += 0
-    print total
+    print total, float(total[1] / total[0])
     return float(total[1] / total[0])
 
 def f1(prediction, true):
